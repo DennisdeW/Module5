@@ -1,3 +1,4 @@
+//#include "../libssh2.lib"
 /*
  * File.h
  *
@@ -11,10 +12,10 @@
 
 typedef char* HashStr;
 
-struct FileDescriptor {
+typedef struct {
 	char *identifier;
 	ulong size;
 	uid_t owner;
-};
+} FileDescriptor;
 
 #endif /* SRC_FILE_H_ */

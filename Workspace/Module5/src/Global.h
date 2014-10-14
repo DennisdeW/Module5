@@ -8,6 +8,9 @@
 #ifndef SRC_GLOBAL_H_
 #define SRC_GLOBAL_H_
 
+#include "libssh2.h"
+#include "sqlite3.h"
+
 #define bool struct {True=1; False=0};
 
 typedef unsigned long long ulong;
