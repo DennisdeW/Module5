@@ -14,5 +14,6 @@ typedef unsigned long long ulong;
 typedef unsigned int uint;
 typedef ulong uid_t;
 typedef char* bytearr;
+typedef char* Password;
 
 #endif /* SRC_GLOBAL_H_ */

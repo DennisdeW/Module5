@@ -14,7 +14,7 @@ typedef char* HashStr;
 struct FileDescriptor {
 	char *identifier;
 	ulong size;
-	ulong userId;
+	uid_t owner;
 };
 
 #endif /* SRC_FILE_H_ */
