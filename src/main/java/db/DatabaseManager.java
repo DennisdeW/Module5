@@ -1,5 +1,7 @@
 package db;
 
+import global.Logger;
+
 import java.lang.ref.WeakReference;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -13,6 +15,11 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+/**
+ * 
+ * @author Dennis (Partly copied from Data & Informatie project - di07)
+ *
+ */
 public class DatabaseManager {
 
 	private static final Connection DB_CONN;
@@ -89,6 +96,7 @@ public class DatabaseManager {
 	}
 
 	public static void main(String[] args) throws SQLException {
+		Logger.init();
 		Statement s = DB_CONN.createStatement();
 		ResultSet r = s.executeQuery("SELECT * FROM User;");
 		r.next();
@@ -99,6 +107,18 @@ public class DatabaseManager {
 		
 		System.out.println(UserStatementMaker.getId(name));
 		System.out.println(activeResults.size() + ", " + activeStatements.size());
+		System.out.println();
+		System.out.println(Tuple.fromResultSet(UserStatementMaker.getUserData(0))[0]);
+		Logger.log("Done Testing");
+		try {
+			Thread.sleep(1000);
+		} catch (InterruptedException e) {
+		}
+		Logger.log("Testing error...");
+		Logger.logError(new RuntimeException());
+		Logger.log("Testing Uncaught...");
+		throw new OutOfMemoryError();
+		//Logger.log("Terminating...");
 	}
 
 	protected static void registerResult(ResultSet r, PreparedStatement s) {
@@ -115,6 +135,7 @@ public class DatabaseManager {
 	 */
 	private static final class CleanupThread extends Thread {
 		public void run() {
+			Logger.log("Running Cleanup...");
 			try {
 				for (ResultSet rs : activeResults.keySet())
 					clean(rs);
@@ -123,6 +144,7 @@ public class DatabaseManager {
 				DB_CONN.close();
 			} catch (Throwable t) {
 			}
+			Logger.log("Cleanup Done.");
 		}
 	}
 }

@@ -119,8 +119,8 @@ public final class Tuple {
 	 *         <code>classes[i]</code>.
 	 */
 	public boolean isOfTypes(Class<?>... classes) {
-		if (classes.length != size) 
-			throw new IllegalArgumentException("Sizes don't match (classes.length: " + classes.length + ", size: " + size + ")");
+		if (classes.length != size)
+			return false;
 		for (int i = 0; i < size; i++) {
 			if (items[i] == null)
 				continue;
@@ -133,7 +133,7 @@ public final class Tuple {
 			if (!inTuple.equalsIgnoreCase(inClass)
 					&& !(items[i].getClass().isAssignableFrom(classes[i]) || classes[i]
 							.isAssignableFrom(items[i].getClass())))
-				throw new IllegalArgumentException("item " + i + " is of class " + inClass + " instead of " + inTuple);
+				return false;
 		}
 		return true;
 	}
@@ -209,7 +209,6 @@ public final class Tuple {
 		DatabaseManager.clean(in);
 		return res.toArray(new Tuple[] {});
 	}
-
 
 	/**
 	 * Makes a shallow copy of a <code>Tuple</code>. <br>

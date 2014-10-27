@@ -19,8 +19,11 @@ public class UserStatementMaker {
 	}
 
 	public static ResultSet getUserData(int id) throws SQLException {
-		
-		return null;
+		PreparedStatement statement = DatabaseManager.prepare("SELECT * FROM User WHERE id = ?;");
+		statement.setInt(1, id);
+		ResultSet result = statement.executeQuery();
+		DatabaseManager.registerResult(result, statement);
+		return result;
 	}
 	
 }
