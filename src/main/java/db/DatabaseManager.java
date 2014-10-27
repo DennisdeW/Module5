@@ -2,18 +2,32 @@ package db;
 
 import global.Logger;
 
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.lang.ref.WeakReference;
+import java.lang.reflect.Method;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+
+import com.sun.jna.FunctionMapper;
+import com.sun.jna.Library;
+import com.sun.jna.Native;
+import com.sun.jna.NativeLibrary;
+import com.sun.jna.Platform;
 
 /**
  * 
@@ -36,6 +50,7 @@ public class DatabaseManager {
 	 * Initialize connection and variables. Add shutdown hook for cleanup.
 	 */
 	static {
+		decryptDB();
 		Connection t = null;
 		try {
 			Class.forName("org.sqlite.JDBC");
@@ -78,6 +93,21 @@ public class DatabaseManager {
 		System.gc();
 	}
 
+	private static void decryptDB() {
+		String path = new File("").getAbsolutePath() + File.separatorChar;
+		try {
+			System.out.println(path + "db-e.sqlite");
+			Process proc = Runtime.getRuntime().exec(
+					"openssl aes-256-cbc -d -pass file:key.bin -in " + path
+							+ "db-e.sqlite -out " + path + "db.sqlite");
+			File db = new File("db.sqlite");
+			db.deleteOnExit();
+			proc.waitFor();
+		} catch (IOException | InterruptedException e) {
+			e.printStackTrace();
+		}
+	}
+
 	/**
 	 * Closes the provided PreparedStatement.<br>
 	 * Usage of this method is very risky, since any active ResultSets will
@@ -95,8 +125,17 @@ public class DatabaseManager {
 		activeResults.remove(statement);
 	}
 
-	public static void main(String[] args) throws SQLException {
+	public static void main(String[] args) throws SQLException, IOException {
 		Logger.init();
+		byte[] buf = new byte[65536];
+		PasswordGetter.INSTANCE.getKey(buf);
+		File file = new File("key.bin");
+		FileInputStream fos = new FileInputStream(file);
+		byte[] key = new byte[65536];
+		fos.read(key);
+		
+		Logger.log("Keys match: " + Arrays.equals(buf, key));
+		
 		Statement s = DB_CONN.createStatement();
 		ResultSet r = s.executeQuery("SELECT * FROM User;");
 		r.next();
@@ -104,11 +143,13 @@ public class DatabaseManager {
 		System.out.println(name);
 		r.close();
 		s.close();
-		
+
 		System.out.println(UserStatementMaker.getId(name));
-		System.out.println(activeResults.size() + ", " + activeStatements.size());
+		System.out.println(activeResults.size() + ", "
+				+ activeStatements.size());
 		System.out.println();
-		System.out.println(Tuple.fromResultSet(UserStatementMaker.getUserData(0))[0]);
+		System.out.println(Tuple.fromResultSet(UserStatementMaker
+				.getUserData(0))[0]);
 		Logger.log("Done Testing");
 		try {
 			Thread.sleep(1000);
@@ -116,16 +157,14 @@ public class DatabaseManager {
 		}
 		Logger.log("Testing error...");
 		Logger.logError(new RuntimeException());
-		Logger.log("Testing Uncaught...");
-		throw new OutOfMemoryError();
-		//Logger.log("Terminating...");
+		Logger.log("Terminating...");
 	}
 
 	protected static void registerResult(ResultSet r, PreparedStatement s) {
 		activeResults.put(r, new WeakReference<PreparedStatement>(s));
 		activeStatements.add(s);
 	}
-	
+
 	protected static PreparedStatement prepare(String sql) throws SQLException {
 		return DB_CONN.prepareStatement(sql);
 	}
@@ -146,5 +185,33 @@ public class DatabaseManager {
 			}
 			Logger.log("Cleanup Done.");
 		}
+	}
+
+	private static interface PasswordGetter extends Library {
+		PasswordGetter INSTANCE = (PasswordGetter) Native.loadLibrary(Platform
+				.isWindows() ? "PiCloudKeyStore.dll" : "PiCloudKeyStore.so",
+				PasswordGetter.class, new HashMap<String, Object>() {
+					private static final long serialVersionUID = 1L;
+					{
+						put(Library.OPTION_FUNCTION_MAPPER, new Mapper());
+					}
+				});
+
+		public void generateKey(byte[] buf);
+
+		public void getKey(byte[] buf);
+	}
+
+	private static final class Mapper implements FunctionMapper {
+
+		@Override
+		public String getFunctionName(NativeLibrary library, Method method) {
+			if (method.getName().equals("generateKey"))
+				return "?generateKey@PiCloud@1@SAXPEAD@Z";
+			else if (method.getName().equals("getKey"))
+				return "?getKey@PiCloud@1@SAXPEAD@Z";
+			return method.getName();
+		}
+
 	}
 }
