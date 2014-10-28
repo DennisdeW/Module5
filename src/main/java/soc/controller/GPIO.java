@@ -31,8 +31,10 @@ public class GPIO {
 			lock = new ReentrantLock();
 		}
 		if (GPIO == null) {
-			Spi.wiringPiSPISetup(0, 32000000);
+			Tools.waitForMs(100);
 			GPIO = GpioFactory.getInstance();
+			Tools.waitForMs(100);
+			Spi.wiringPiSPISetup(0, 32000000);
 		}
 		this.settings = settings;
 	}
@@ -58,19 +60,30 @@ public class GPIO {
 		if (!getLock(timeout)) {
 			return null;
 		}
+		boolean fail = false;
 		int maxBuff = Message.PACKET_SIZE;
 		GpioPinDigitalInput DE1Active = 
 				getInPin(settings.getDe1ActivePin());
 		// wait till DE1 is not sending
+		System.out.println("waiting for DE1 not sending");
 		waitForPin(settings.getDe1ActivePin(), false, timeout);
+		System.out.println("done.");
 		// set encryption/decryption command pin
+		System.out.println("Setting command pin: " + settings.getCommandPin());
 		getOutPin(settings.getCommandPin(), 
-				encrypt ? PinState.LOW : PinState.HIGH);		
+				encrypt ? PinState.LOW : PinState.HIGH);	
+		System.out.println("done.");
 		// tell the DE1 the Pi is going to send
+		System.out.println("Settings pi active pin: " + settings.getPiActivePin());
 		getOutPin(settings.getPiActivePin(), PinState.HIGH);	
+		System.out.println("done.");
 		// wait for specified time
+		System.out.println("Waiting for " + settings.getPiActiveWaitTime() + " ns");
 		Tools.waitForNs(settings.getPiActiveWaitTime());
+		System.out.println("done.");
 		// send data to DE1 for encryption/decryption and receive data
+		System.out.println("Sending message to DE1: " + msg.toString() + 
+				"for" + (encrypt ? "encryption" : "decryption"));
 		int readIndex = 0;
 		byte[] buffer = new byte[maxBuff];
 		byte[] allZeros = new byte[maxBuff];
@@ -79,22 +92,28 @@ public class GPIO {
 		Timer timer = new Timer(timeout, true);
 		for (int i = 0; i < msg.getData().length + maxBuff; i += maxBuff) {
 			System.arraycopy(msg.getData(), i, buffer, 0, maxBuff);
+			System.out.println("Sending buffer " + i + " : " + Arrays.toString(buffer));
 			// try to send data
 			if (Spi.wiringPiSPIDataRW(0, buffer, maxBuff) == -1) {
 				Logger.logError("Could not send data to DE1: " + Arrays.toString(buffer));
+				System.out.println("Could not send data to DE1: " + Arrays.toString(buffer));
 				i -= maxBuff;
 			}
+			System.out.println("Done sending buffer " + i);
 			// check for response from DE1
 			if (!Tools.allEqualTo(buffer, (byte)0) && DE1Active.isHigh()) {
+				System.out.println("Got answer " + i + " from DE1: " + buffer);
 				System.arraycopy(buffer, 0, receivedBytes, i, maxBuff);
 				readIndex += maxBuff;
 			}
 			// check for time-out
 			if (timer.hasExpired() && i < msg.getData().length) {
-				Logger.logError("Timed out" + Arrays.toString(buffer));				
+				Logger.logError("Timed out" + Arrays.toString(buffer));	
+				System.out.println("Timed out" + Arrays.toString(buffer));	
 				return null;
 			}
 		}	
+		System.out.println("Done sending message, waiting for all packets to be received");
 		// receive pending packages from DE1
 		timer.restart();
 		for (; readIndex < msg.getData().length;) {	
@@ -102,24 +121,32 @@ public class GPIO {
 			Spi.wiringPiSPIDataRW(0, buffer, maxBuff);
 			// check for response from DE1
 			if (!Tools.allEqualTo(buffer, (byte)0) && DE1Active.isHigh()) {
+				System.out.println("Got answer " + readIndex + " from DE1: " + buffer);
 				System.arraycopy(buffer, 0, receivedBytes, readIndex, maxBuff);
 				readIndex += maxBuff;
 			} else if (DE1Active.isLow()) {
 				Logger.logError("Did not get whole message from DE1: "
 						+ "\nGood: " + msg + "\nActual: " + receivedBytes);
-				// tell the DE1 the Pi is done sending
-		        getOutPin(settings.getPiActivePin(), PinState.HIGH);
-		        return null;
+				System.out.println("Did not get whole message from DE1: "
+						+ "\nGood: " + msg + "\nActual: " + receivedBytes);
+		        fail = true;
 			} else if (timer.hasExpired()) {
 				Logger.logError("Timed out" + Arrays.toString(buffer));	
-				// tell the DE1 the Pi is done sending
-		        getOutPin(settings.getPiActivePin(), PinState.HIGH);
-		        return null;
+				System.out.println("Timed out" + Arrays.toString(buffer));
+		        fail = true;
 			}
 		}
 		// tell the DE1 the Pi is done sending
+		System.out.println("Set pi active pin to low");
         getOutPin(settings.getPiActivePin(), PinState.HIGH);
-		return new Message(receivedBytes, msg.getActualSize(), encrypt);
+        System.out.println("Done.");
+        releaseLock();
+        if (fail) {
+        	return null;
+        } else {
+    		System.out.println("Message " + (encrypt ? "encryption " : "decryption ") + "done");
+        	return new Message(receivedBytes, msg.getActualSize(), encrypt);
+        }
 	}	
 	
 	/**
@@ -133,7 +160,7 @@ public class GPIO {
 	 */
 	public boolean waitForPin(Pin pin, boolean waitforHigh, long timeout) {
         final GpioPinDigitalInput aPin = getInPin(pin, PinPullResistance.OFF);
-		Timer timer = new Timer(timeout, true);
+        Timer timer = new Timer(timeout, true);
 		while (waitforHigh ? !aPin.isHigh() : !aPin.isLow()) {
 			Tools.waitForMs(10);
 			if (timer.hasExpired()) {
@@ -151,7 +178,7 @@ public class GPIO {
 	 * @return the pin
 	 */
 	private synchronized GpioPinDigitalInput getInPin(Pin pin, PinPullResistance defaultState) {
-		return GPIO.provisionDigitalInputPin(pin, defaultState);
+		return GPIO.provisionDigitalInputPin(pin, pin.toString(), defaultState);
 	}
 	/**
 	 * Gets an input pin.
@@ -160,7 +187,7 @@ public class GPIO {
 	 * @return the pin
 	 */	
 	private synchronized GpioPinDigitalInput getInPin(Pin pin) {
-		return GPIO.provisionDigitalInputPin(pin);
+		return GPIO.provisionDigitalInputPin(pin, pin.toString());
 	}
 	
 	/**
@@ -171,7 +198,7 @@ public class GPIO {
 	 * @return the pin
 	 */
 	private synchronized GpioPinDigitalOutput getOutPin(Pin pin, PinState defaultState) {
-		return GPIO.provisionDigitalOutputPin(pin, defaultState);
+		return GPIO.provisionDigitalOutputPin(pin, pin.toString(), defaultState);
 	}
 	
 	/**
@@ -181,7 +208,7 @@ public class GPIO {
 	 * @return the pin
 	 */	
 	private synchronized GpioPinDigitalOutput getOutPin(Pin pin) {
-		return GPIO.provisionDigitalOutputPin(pin);
+		return GPIO.provisionDigitalOutputPin(pin, pin.toString());
 	}
 	
 	/**
@@ -194,14 +221,18 @@ public class GPIO {
 	 */
 	private boolean getLock(long timeout) {
 		boolean hasLock = false;
-		Timer timer = new Timer(timeout);
+		Timer timer = new Timer(timeout, true);
 		while (!hasLock && !timer.hasExpired()) {
-			try {
-				lock.wait(timeout);
-				hasLock = lock.tryLock();
-			} catch (InterruptedException e) {}
+			Tools.waitForMs(10);
+			hasLock = lock.tryLock();
 		}
 		return hasLock;
+	}
+	
+	private void releaseLock() {
+		if (lock.isHeldByCurrentThread()) {
+			lock.unlock();
+		}
 	}
 	
 	/**
@@ -215,7 +246,7 @@ public class GPIO {
 	public static void main(String[] args) {
 		GPIO gpio = new GPIO(new GPIOSettings());
 		byte[] data = new byte[]{0,1,2,3,4,5,6,7,8,9};
-		gpio.sendAndReceiveData(new Message(data, false), false, 1000);
+		gpio.sendAndReceiveData(new Message(data, false), false, 100000);
 		gpio.shutdown();
 	}
 
