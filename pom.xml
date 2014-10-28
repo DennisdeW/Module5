@@ -45,16 +45,22 @@
 				<configuration>
 					<source>1.8</source>
 					<target>1.8</target>
-					<artifactItems>
-						<artifactItem>
-							<groupId>piCloud</groupId>
-							<artifactId>libsqlitejdbc</artifactId>
-							<version>1.0</version>
-							<type>so</type>
-							<destFileName>libsqlitejdbc.so</destFileName>
-						</artifactItem>
-					</artifactItems>
 				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>com.googlecode.mavennatives</groupId>
+				<artifactId>maven-nativedependencies-plugin</artifactId>
+				<version>0.0.7</version>
+				<executions>
+					<execution>
+						<id>unpacknatives</id>
+						<phase>generate-resources</phase>
+						<goals>
+							<!--suppress MavenModelInspection (this line is for IDEA) -->
+							<goal>copy</goal>
+						</goals>
+					</execution>
+				</executions>
 			</plugin>
 		</plugins>
 	</build>

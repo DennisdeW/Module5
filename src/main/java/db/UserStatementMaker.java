@@ -128,6 +128,12 @@ public class UserStatementMaker {
 		return getPass(getId(name));
 	}
 
+	/**
+	 * Deletes the account with this id
+	 * @param id The id of the user to delete
+	 * @return 
+	 * @throws SQLException
+	 */
 	public static boolean deleteAccount(int id) throws SQLException {
 		PreparedStatement statement = DatabaseManager
 				.prepare("DELETE FROM User WHERE id = ?;");
