@@ -48,7 +48,7 @@ public class DatabaseManager {
 	 */
 	static {
 		if (Platform.isLinux()) {
-			System.load("libsqlitejdbc.so");
+			System.load(new File("").getAbsolutePath() + "/libsqlitejdbc.so");
 		}
 		decryptDB();
 		Connection t = null;
