@@ -108,7 +108,7 @@ public class DatabaseManager {
 		String path = new File("").getAbsolutePath() + File.separatorChar;
 		try {
 			Process proc = Runtime.getRuntime().exec("openssl aes-256-cbc -e -pass file:key.bin -out " + path
-								+ "db-e.sqlite -out " + path + "db.sqlite");
+								+ "db-e.sqlite -in " + path + "db.sqlite");
 			proc.waitFor();
 		} catch (IOException | InterruptedException e) {
 			e.printStackTrace();

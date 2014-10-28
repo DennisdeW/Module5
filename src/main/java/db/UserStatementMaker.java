@@ -12,10 +12,14 @@ public class UserStatementMaker {
 
 	/**
 	 * Gets the ID of a user with the given name.
+	 * 
 	 * @param name
-	 * @return
+	 *            The name to find the id for
+	 * @return The id corresponding to the name
 	 * @throws SQLException
+	 *             If the generated statements cannot be executed
 	 * @throws UnknownUserException
+	 *             If there is no user with this name
 	 */
 	public static int getId(String name) throws SQLException,
 			UnknownUserException {
@@ -30,6 +34,18 @@ public class UserStatementMaker {
 		throw new UnknownUserException("For Name: " + name);
 	}
 
+	/**
+	 * Gets all data information about the user corresponding to id.<br>
+	 * <b>Do not forget to call DatabaseManager.clean() on the result!</b>
+	 * Tuple.fromResultSet() will also do this.
+	 * 
+	 * @param id
+	 *            The user's id
+	 * @return A ResultSet containing the result of the query <i>SELECT * FROM
+	 *         User WHERE id = [id]</i>
+	 * @throws SQLException
+	 *             If the generated statements cannot be executed
+	 */
 	public static ResultSet getUserData(int id) throws SQLException {
 		PreparedStatement statement = DatabaseManager
 				.prepare("SELECT * FROM User WHERE id = ?;");
@@ -39,6 +55,17 @@ public class UserStatementMaker {
 		return result;
 	}
 
+	/**
+	 * Gets the (salted and hashed) password corresponing to the given id.
+	 * 
+	 * @param id
+	 *            A user's id.
+	 * @return The salted and hashed password belonging to the user.
+	 * @throws SQLException
+	 *             If the generated statements cannot be executed
+	 * @throws UnknownUserException
+	 *             If there is no user with this id
+	 */
 	public static byte[] getPass(int id) throws SQLException,
 			UnknownUserException {
 		PreparedStatement statement = DatabaseManager
@@ -52,6 +79,19 @@ public class UserStatementMaker {
 		throw new UnknownUserException("For ID: " + id);
 	}
 
+	/**
+	 * Salts and hashes the given password with the salt corresponding to id.
+	 * 
+	 * @param id
+	 *            The user's id
+	 * @param pass
+	 *            The password to salt and hash
+	 * @return The salted and hashed password
+	 * @throws SQLException
+	 *             If the generated statements cannot be executed
+	 * @throws UnknownUserException
+	 *             If there is no user with this id
+	 */
 	public static byte[] saltPass(int id, byte[] pass) throws SQLException,
 			UnknownUserException {
 		PreparedStatement statement = DatabaseManager
@@ -70,6 +110,19 @@ public class UserStatementMaker {
 		throw new UnknownUserException("For Id: " + id);
 	}
 
+	/**
+	 * Convenience method to get a password:
+	 * <code>return getPass(getId(name));</code>
+	 * 
+	 * @param name
+	 *            The user's name.
+	 * @return The user's (salted and hashed) password
+	 * @throws SQLException
+	 *             If the generated statements cannot be executed
+	 * @throws UnknownUserException
+	 *             If there is no user with this name OR getId(name) returned an
+	 *             improper result
+	 */
 	public static byte[] getPass(String name) throws SQLException,
 			UnknownUserException {
 		return getPass(getId(name));
@@ -101,7 +154,7 @@ public class UserStatementMaker {
 
 		PreparedStatement statement = DatabaseManager
 				.prepare("INSERT INTO User VALUES (?, ?, ?, ?);");
-		
+
 		byte[] salted = new byte[512];
 		byte[] raw = new byte[pass.length + salt.length];
 		System.arraycopy(pass, 0, raw, 0, pass.length);
@@ -109,20 +162,22 @@ public class UserStatementMaker {
 		SHA3Digest sha3 = new SHA3Digest(512);
 		sha3.update(raw, 0, raw.length);
 		sha3.doFinal(salted, 0);
-		
+
 		statement.setInt(1, getNextId());
 		statement.setString(2, name);
 		statement.setBytes(3, salted);
 		statement.setBytes(4, salt);
-		
+
 		if (statement.executeUpdate() <= 0)
-			throw new RuntimeException("Create Account statement failed to create new account!");
-		
-		statement.close();			
+			throw new RuntimeException(
+					"Create Account statement failed to create new account!");
+
+		statement.close();
 		try {
 			return getId(name);
 		} catch (UnknownUserException e) {
-			throw new RuntimeException("Create Account statement failed to create account!");
+			throw new RuntimeException(
+					"Create Account statement failed to create account!");
 		}
 	}
 
