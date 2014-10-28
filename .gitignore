@@ -1,3 +1,6 @@
-/target/
-
 piCloud.log
+target/*
+!target/classes/
+target/classes/*
+!target/classes/PiCloudKeyStore.dll
+/target/
