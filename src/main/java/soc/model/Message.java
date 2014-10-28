@@ -1,6 +1,7 @@
 package soc.model;
 
 import java.security.SecureRandom;
+import java.util.Arrays;
 
 /**
  * Represents an entire file which can be send to the DE1 or is received
@@ -33,7 +34,7 @@ public class Message {
 	public Message(byte[] data, boolean encrypted) {
 		actualSize = data.length;
 		int missingBytes;
-		if ((missingBytes = data.length % PACKET_SIZE) != 0) {
+		if ((missingBytes = (PACKET_SIZE - (data.length % PACKET_SIZE))) != 0) {
 			messageData = new byte[data.length + missingBytes];
 			System.arraycopy(data, 0, messageData, 0, data.length);
 			byte[] randomBuff = generateRandomBytes(missingBytes);
@@ -78,6 +79,13 @@ public class Message {
 	
 	public void setEncrypted(boolean encrypted) {
 		this.encrypted = encrypted;
+	}
+	
+	@Override
+	public String toString() {
+		return "Message - encrypted: " + encrypted + 
+				", actual size: " + actualSize + 
+				", data: " + Arrays.toString(messageData);
 	}
 	
 	/**
