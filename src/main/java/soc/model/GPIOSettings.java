@@ -1,6 +1,13 @@
 package soc.model;
 
+import java.lang.reflect.Field;
+
+import com.pi4j.io.gpio.GpioController;
+import com.pi4j.io.gpio.GpioPinDigitalInput;
+import com.pi4j.io.gpio.GpioPinDigitalOutput;
 import com.pi4j.io.gpio.Pin;
+import com.pi4j.io.gpio.PinPullResistance;
+import com.pi4j.io.gpio.PinState;
 import com.pi4j.io.gpio.RaspiPin;
 
 /**
@@ -9,11 +16,15 @@ import com.pi4j.io.gpio.RaspiPin;
  * @author rvemous
  */
 public class GPIOSettings {
-	
-	private Pin commandPin;
-	private Pin piActivePin;
-	private Pin de1ActivePin;
+
+	private int commandPinNr;
+	private int piActivePinNr;
+	private int de1ActivePinNr;
 	private long piActiveWaitTime; //ns;
+	
+	private GpioPinDigitalOutput commandPin;
+	private GpioPinDigitalOutput piActivePin;
+	private GpioPinDigitalInput de1ActivePin;
 	
 	/**
 	 * Creates new GPIO settings.
@@ -23,10 +34,10 @@ public class GPIOSettings {
 	 * @param de1ActivePin the pin used to tell the Pi the DE1 is sending
 	 * @param piActiveWaitTime time the Pi waits after setting the piActivePin
 	 */
-	public GPIOSettings(Pin commandPin, Pin piActivePin, Pin de1ActivePin, long piActiveWaitTime) {
-		this.commandPin = commandPin;
-		this.piActivePin = piActivePin;
-		this.de1ActivePin = de1ActivePin;
+	public GPIOSettings(int commandPinNr, int piActivePinNr, int de1ActivePinNr, long piActiveWaitTime) {
+		this.commandPinNr = commandPinNr;
+		this.piActivePinNr = piActivePinNr;
+		this.de1ActivePinNr = de1ActivePinNr;
 		this.piActiveWaitTime = piActiveWaitTime;
 	}
 	
@@ -37,9 +48,9 @@ public class GPIOSettings {
 	 */
 	public GPIOSettings(GPIOSettings settings) {
 		this( 
-			settings.commandPin,
-			settings.piActivePin,
-			settings.de1ActivePin,
+			settings.commandPinNr,
+			settings.piActivePinNr,
+			settings.de1ActivePinNr,
 			settings.piActiveWaitTime
 			);
 	}
@@ -48,10 +59,14 @@ public class GPIOSettings {
 	 * Loads default GPIO settings.
 	 */
 	public GPIOSettings() {	
-		commandPin = RaspiPin.GPIO_00;
-		piActivePin = RaspiPin.GPIO_01;
-		de1ActivePin = RaspiPin.GPIO_02;
+		commandPinNr = 0;
+		piActivePinNr = 1;
+		de1ActivePinNr = 2;
 		piActiveWaitTime = 100; //0.1 ms
+	}
+	
+	public int getCommandPinNr() {
+		return commandPinNr;
 	}
 	
 	/**
@@ -60,18 +75,15 @@ public class GPIOSettings {
 	 * 
 	 * @return the pin
 	 */
-	public Pin getCommandPin() {
+	public GpioPinDigitalOutput getCommandPin(GpioController gpio) {
+		if (commandPin == null) {
+			commandPin = getOutPin(gpio, commandPinNr);
+		}
 		return commandPin;
 	}
 	
-	/**
-	 * Sets the pin used tell the DE1 whether to encrypt or decrypt the 
-	 * data.
-	 * 
-	 * @param commandPin the pin to use
-	 */	
-	public void setCommandPin(Pin commandPin) {
-		this.commandPin = commandPin;
+	public int getPiActivePinNr() {
+		return piActivePinNr;
 	}
 
 	/**
@@ -79,17 +91,15 @@ public class GPIOSettings {
 	 * 
 	 * @return the pin
 	 */
-	public Pin getPiActivePin() {
+	public GpioPinDigitalOutput getPiActivePin(GpioController gpio) {
+		if (piActivePin == null) {
+			piActivePin = getOutPin(gpio, piActivePinNr);
+		}
 		return piActivePin;
 	}
 	
-	/**
-	 * Sets the pin used tell the DE1 whether the Pi is sending. 
-	 * 
-	 * @param piActivePin the pin to use
-	 */		
-	public void setPiActivePin(Pin piActivePin) {
-		this.piActivePin = piActivePin;
+	public int getDe1ActivePinNr() {
+		return de1ActivePinNr;
 	}
 
 	/**
@@ -97,18 +107,12 @@ public class GPIOSettings {
 	 * 
 	 * @return the pin
 	 */
-	public Pin getDe1ActivePin() {
+	public GpioPinDigitalInput getDe1ActivePin(GpioController gpio) {
+		if (de1ActivePin == null) {
+			de1ActivePin = getInPin(gpio, de1ActivePinNr);
+		}
 		return de1ActivePin;
 	}
-	
-	/**
-	 * Sets the pin used tell the Pi whether the DE1 is sending. 
-	 * 
-	 * @param de1ActivePin the pin to use
-	 */	
-	public void setDe1ActivePin(Pin de1ActivePin) {
-		this.de1ActivePin = de1ActivePin;
-	}	
 	
 	/**
 	 * Gets the time in ns the Pi waits after setting the value of the 
@@ -128,6 +132,79 @@ public class GPIOSettings {
 	 */	
 	public void setPiActiveWaitTime(long piActiveWaitTime) {
 		this.piActiveWaitTime = piActiveWaitTime;
+	}
+	
+	/**
+	 * Gets the output pin belonging to the provided number.
+	 * 
+	 * @param pinNr the number of the pin
+	 * @return the pin
+	 */		
+	private synchronized final GpioPinDigitalOutput getOutPin(GpioController gpio, int pinNr) {
+		try {
+			return gpio.provisionDigitalOutputPin((Pin)getPinField(pinNr).get(null));
+		} catch (IllegalArgumentException | IllegalAccessException e) {
+			return null;
+		}
+	}
+	
+	/**
+	 * Gets the output pin belonging to the provided number.
+	 * 
+	 * @param pinNr the number of the pin
+	 * @param setting the default pin settings (high or low)
+	 * @return the pin
+	 */	
+	private synchronized final GpioPinDigitalOutput getOutPin(GpioController gpio, int pinNr, PinState setting) {
+		try {
+			return gpio.provisionDigitalOutputPin((Pin)getPinField(pinNr).get(null), setting);
+		} catch (IllegalArgumentException | IllegalAccessException e) {
+			return null;
+		}
+	}
+	
+	/**
+	 * Gets the input pin belonging to the provided number.
+	 * 
+	 * @param pinNr the number of the pin
+	 * @return the pin
+	 */		
+	private synchronized final GpioPinDigitalInput getInPin(GpioController gpio, int pinNr) {
+		try {
+			return gpio.provisionDigitalInputPin((Pin)getPinField(pinNr).get(null));
+		} catch (IllegalArgumentException | IllegalAccessException e) {
+			return null;
+		}
+	}
+	
+	/**
+	 * Gets the input pin belonging to the provided number.
+	 * 
+	 * @param pinNr the number of the pin
+	 * @param setting the default pin setting
+	 * @return the pin
+	 */
+	private synchronized final GpioPinDigitalInput getInPin(GpioController gpio, int pinNr, PinPullResistance setting) {
+		try {
+			return gpio.provisionDigitalInputPin((Pin)getPinField(pinNr).get(null), setting);
+		} catch (IllegalArgumentException | IllegalAccessException e) {
+			return null;
+		}
+	}
+	
+	/**
+	 * Gets the static field within the RaspiPin class which represents
+	 * this pin. 
+	 * 
+	 * @param pinNr the number of the pin
+	 * @return the field
+	 */
+	private synchronized Field getPinField(int pinNr) {
+		try {
+			return RaspiPin.class.getDeclaredField("GPIO_" + (pinNr < 10 ? "0" : "") + pinNr);
+		} catch (NoSuchFieldException | SecurityException e) {
+			return null;
+		}
 	}
 	
 }
