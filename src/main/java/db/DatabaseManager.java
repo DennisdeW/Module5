@@ -18,6 +18,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Properties;
 import java.util.Set;
 
 import com.sun.jna.FunctionMapper;
@@ -34,7 +35,6 @@ import com.sun.jna.Platform;
 public class DatabaseManager {
 
 	private static final Connection DB_CONN;
-
 	/**
 	 * Always update activeResults when returing a ResultSet. Volatile because
 	 * WeakReferences may become invalid.
@@ -50,8 +50,11 @@ public class DatabaseManager {
 		decryptDB();
 		Connection t = null;
 		try {
-			Class.forName("org.sqlite.JDBC");
-			t = DriverManager.getConnection("jdbc:sqlite:db.sqlite");
+			Class.forName("org.postgresql.Driver");
+			Properties props = new Properties();
+			props.setProperty("user", "postgres");
+			props.setProperty("password", "piCloud");
+			t = DriverManager.getConnection("jdbc:postgresql://localhost/piCloud", props);
 		} catch (ClassNotFoundException | SQLException e) {
 			e.printStackTrace();
 			System.exit(1);
@@ -145,9 +148,9 @@ public class DatabaseManager {
 		Logger.log("Keys match: " + Arrays.equals(buf, key));
 		
 		Statement s = DB_CONN.createStatement();
-		ResultSet r = s.executeQuery("SELECT * FROM User;");
+		ResultSet r = s.executeQuery("SELECT * FROM \"Users\";");
 		r.next();
-		String name = r.getString("Name");
+		String name = r.getString("name");
 		System.out.println(name);
 		r.close();
 		s.close();
@@ -180,7 +183,7 @@ public class DatabaseManager {
 	protected static PreparedStatement prepare(String sql) throws SQLException {
 		return DB_CONN.prepareStatement(sql);
 	}
-
+	
 	/**
 	 * Closes Remaining Connections
 	 */

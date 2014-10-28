@@ -55,10 +55,7 @@ public class FileDescriptor {
 	}
 
 	public static FileDescriptor forTuple(Tuple tup) {
-		if (!tup.isOfTypes(byte[].class, long.class, int.class)
-				&& !tup.isOfTypes(byte[].class, int.class, int.class)
-				&& !tup.isOfTypes(byte[].class, short.class, int.class)
-				&& !tup.isOfTypes(byte[].class, byte.class, int.class))
+		if (!tup.isOfTypes(byte[].class, Integer.class, Long.class))
 			throw new IllegalArgumentException(
 					"Invalid Tuple passed to FileDescriptor.forTuple()!");
 		String id = new String((byte[]) tup.getItem(0));
