@@ -97,6 +97,7 @@ public class DatabaseManager {
 					"openssl aes-256-cbc -d -pass file:key.bin -in " + path
 							+ "db-e.sqlite -out " + path + "db.sqlite");
 			File db = new File("db.sqlite");
+			System.out.println(db.getAbsolutePath());
 			db.deleteOnExit();
 			proc.waitFor();
 		} catch (IOException | InterruptedException e) {
