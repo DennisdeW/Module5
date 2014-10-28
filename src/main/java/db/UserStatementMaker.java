@@ -10,6 +10,13 @@ import org.bouncycastle.crypto.digests.SHA3Digest;
 
 public class UserStatementMaker {
 
+	/**
+	 * Gets the ID of a user with the given name.
+	 * @param name
+	 * @return
+	 * @throws SQLException
+	 * @throws UnknownUserException
+	 */
 	public static int getId(String name) throws SQLException,
 			UnknownUserException {
 		PreparedStatement statement = DatabaseManager
