@@ -50,7 +50,7 @@
 			<plugin>
 				<groupId>com.googlecode.mavennatives</groupId>
 				<artifactId>maven-nativedependencies-plugin</artifactId>
-				<version>${natives.version}</version>
+				<version>0.0.7</version>
 				<executions>
 					<execution>
 						<id>unpacknatives</id>
