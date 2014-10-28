@@ -47,7 +47,6 @@ public class DatabaseManager {
 	 * Initialize connection and variables. Add shutdown hook for cleanup.
 	 */
 	static {
-		decryptDB();
 		Connection t = null;
 		try {
 			Class.forName("org.postgresql.Driver");
@@ -91,32 +90,6 @@ public class DatabaseManager {
 		}
 		activeResults.remove(result);
 		System.gc();
-	}
-
-	private static void decryptDB() {
-		String path = new File("").getAbsolutePath() + File.separatorChar;
-		try {
-			Process proc = Runtime.getRuntime().exec(
-					"openssl aes-256-cbc -d -pass file:key.bin -in " + path
-							+ "db-e.sqlite -out " + path + "db.sqlite");
-			File db = new File("db.sqlite");
-			System.out.println(db.getAbsolutePath());
-			db.deleteOnExit();
-			proc.waitFor();
-		} catch (IOException | InterruptedException e) {
-			e.printStackTrace();
-		}
-	}
-	
-	private static void encryptDB() {
-		String path = new File("").getAbsolutePath() + File.separatorChar;
-		try {
-			Process proc = Runtime.getRuntime().exec("openssl aes-256-cbc -e -pass file:key.bin -out " + path
-								+ "db-e.sqlite -in " + path + "db.sqlite");
-			proc.waitFor();
-		} catch (IOException | InterruptedException e) {
-			e.printStackTrace();
-		}
 	}
 
 	/**
@@ -190,7 +163,6 @@ public class DatabaseManager {
 	private static final class CleanupThread extends Thread {
 		public void run() {
 			Logger.log("Running Cleanup...");
-			encryptDB();
 			try {
 				for (ResultSet rs : activeResults.keySet())
 					clean(rs);
