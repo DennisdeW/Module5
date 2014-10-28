@@ -67,7 +67,7 @@ public class DBTest {
 		Assert.assertEquals(uid, (int) tuples[0].getItem(0));
 		Assert.assertEquals(name, (String) tuples[0].getItem(1));
 		Assert.assertArrayEquals(salted, (byte[]) tuples[0].getItem(2));
-
+		
 		try {
 			UserStatementMaker.deleteAccount(uid);
 		} catch (SQLException e1) {

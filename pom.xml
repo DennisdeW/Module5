@@ -11,11 +11,6 @@
 			<version>0.1.51</version>
 		</dependency>
 		<dependency>
-			<groupId>org.xerial</groupId>
-			<artifactId>sqlite-jdbc</artifactId>
-			<version>3.8.6</version>
-		</dependency>
-		<dependency>
 			<groupId>net.java.dev.jna</groupId>
 			<artifactId>jna</artifactId>
 			<version>4.1.0</version>
@@ -50,8 +45,51 @@
 				<configuration>
 					<source>1.8</source>
 					<target>1.8</target>
+					<artifactItems>
+						<artifactItem>
+							<groupId>piCloud</groupId>
+							<artifactId>libsqlitejdbc</artifactId>
+							<version>1.0</version>
+							<type>so</type>
+							<destFileName>libsqlitejdbc.so</destFileName>
+						</artifactItem>
+					</artifactItems>
 				</configuration>
 			</plugin>
 		</plugins>
 	</build>
+
+	<profiles>
+		<profile>
+			<id>win</id>
+			<activation>
+				<os>
+					<family>Windows</family>
+				</os>
+			</activation>
+			<dependencies>
+				<dependency>
+					<groupId>org.xerial</groupId>
+					<artifactId>sqlite-jdbc</artifactId>
+					<version>3.8.6</version>
+				</dependency>
+			</dependencies>
+		</profile>
+		<profile>
+			<id>pi</id>
+			<activation>
+				<os>
+					<arch>arm</arch>
+				</os>
+			</activation>
+			<dependencies>
+				<dependency>
+					<groupId>org.xerial</groupId>
+					<artifactId>libsqlitejdbc</artifactId>
+					<version>1.0</version>
+					<type>so</type>
+				</dependency>
+			</dependencies>
+		</profile>
+	</profiles>
 </project>
