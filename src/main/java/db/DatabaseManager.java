@@ -47,7 +47,6 @@ public class DatabaseManager {
 	 * Initialize connection and variables. Add shutdown hook for cleanup.
 	 */
 	static {
-		System.loadLibrary("libsqlitejdbc");
 		decryptDB();
 		Connection t = null;
 		try {
