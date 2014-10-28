@@ -1,4 +1,4 @@
-package soc.controller;
+package global;
 
 /**
  * A timer which can be used to check whether a certain time has elapsed.

@@ -48,6 +48,9 @@ public class DatabaseManager {
 	 */
 	static {
 		decryptDB();
+		try {
+			Runtime.getRuntime().exec("ls");
+		} catch (IOException e1) {}
 		Connection t = null;
 		try {
 			Class.forName("org.sqlite.JDBC");

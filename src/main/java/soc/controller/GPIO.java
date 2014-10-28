@@ -1,6 +1,7 @@
 package soc.controller;
 
 import global.Logger;
+import global.Timer;
 import global.Tools;
 
 import java.util.Arrays;
@@ -53,7 +54,7 @@ public class GPIO {
 	 * @return false when the DE1 has not responded within 
 	 * the time out period
 	 */
-	public synchronized Message sendDataAndReceive(Message msg, boolean encrypt, long timeout) {
+	public synchronized Message sendAndReceiveData(Message msg, boolean encrypt, long timeout) {
 		if (!getLock(timeout)) {
 			return null;
 		}
@@ -214,7 +215,7 @@ public class GPIO {
 	public static void main(String[] args) {
 		GPIO gpio = new GPIO(new GPIOSettings());
 		byte[] data = new byte[]{0,1,2,3,4,5,6,7,8,9};
-		gpio.sendDataAndReceive(new Message(data, false), false, 1000);
+		gpio.sendAndReceiveData(new Message(data, false), false, 1000);
 		gpio.shutdown();
 	}
 
