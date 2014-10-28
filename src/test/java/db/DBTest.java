@@ -65,14 +65,10 @@ public class DBTest {
 		Assert.assertTrue("getUserData() returned multiple or no rows!",
 				tuples.length == 1);
 		Assert.assertEquals(uid, (int) tuples[0].getItem(0));
-		Assert.assertEquals(name, (String) tuples[0].getItem(1));
-		Assert.assertArrayEquals(salted, (byte[]) tuples[0].getItem(2));
+		Assert.assertEquals(name, (String) tuples[0].getItem(3));
+		Assert.assertArrayEquals(salted, (byte[]) tuples[0].getItem(1));
 		
-		try {
-			UserStatementMaker.deleteAccount(uid);
-		} catch (SQLException e1) {
-			Assert.fail("Exception occured deleting user:" + e1);
-		}
+		
 
 		FileDescriptor testFileA = new FileDescriptor("TestFileA", uid, 9L);
 		FileDescriptor testFileB = new FileDescriptor("TestFileB", uid, 9L);
@@ -109,12 +105,18 @@ public class DBTest {
 			Assert.fail("Exception occured retrieving files by identifier:" + e);
 		}
 		Assert.assertEquals(forIdentifier, testFileA);
-
+		
 		try {
 			Assert.assertTrue("File A was not deleted!", FileStatementMaker.deleteDescriptor(testFileA));
 			Assert.assertTrue("File B was not deleted!", FileStatementMaker.deleteDescriptor(testFileB));
 		} catch (SQLException e) {
 			Assert.fail("Exception occured deleting files:" + e);
+		}
+		
+		try {
+			UserStatementMaker.deleteAccount(uid);
+		} catch (SQLException e1) {
+			Assert.fail("Exception occured deleting user:" + e1);
 		}
 	}
 

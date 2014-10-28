@@ -17,7 +17,7 @@ public class FileStatementMaker {
 	public static FileDescriptor getDescriptor(byte[] identifier)
 			throws SQLException, FileNotFoundException {
 		PreparedStatement statement = DatabaseManager
-				.prepare("SELECT * FROM File WHERE Identifier = ?;");
+				.prepare("SELECT * FROM \"File\" WHERE \"identifier\" = ?;");
 		statement.setBytes(1, identifier);
 		ResultSet result = statement.executeQuery();
 		DatabaseManager.registerResult(result, statement);
@@ -30,7 +30,7 @@ public class FileStatementMaker {
 	public static Set<FileDescriptor> getOwnedFiles(int owner)
 			throws SQLException {
 		PreparedStatement statement = DatabaseManager
-				.prepare("SELECT * FROM File WHERE Owner = ?;");
+				.prepare("SELECT * FROM \"File\" WHERE \"owner\" = ?;");
 		statement.setInt(1, owner);
 		ResultSet result = statement.executeQuery();
 		DatabaseManager.registerResult(result, statement);
@@ -41,31 +41,36 @@ public class FileStatementMaker {
 		return descriptors;
 	}
 
-	public static boolean addDescriptor(FileDescriptor fd) throws SerialException, SQLException {
+	public static boolean addDescriptor(FileDescriptor fd)
+			throws SerialException, SQLException {
 		if (hasDescriptor(fd))
 			return false;
-		PreparedStatement statement = DatabaseManager.prepare("INSERT INTO File VALUES(?, ?, ?);");
-		statement.setBytes(1,fd.getIdentifier().getBytes());
-		statement.setInt(3, fd.getOwner());
-		statement.setLong(2, fd.getSize());
+		PreparedStatement statement = DatabaseManager
+				.prepare("INSERT INTO \"File\" (\"identifier\", \"owner\", \"size\") VALUES(?, ?, ?);");
+		statement.setBytes(1, fd.getIdentifier().getBytes());
+		statement.setInt(2, fd.getOwner());
+		statement.setLong(3, fd.getSize());
 		boolean result = statement.executeUpdate() > 0;
 		statement.close();
 		return result;
 	}
-	
-	public static boolean deleteDescriptor(FileDescriptor fd) throws SerialException, SQLException {
+
+	public static boolean deleteDescriptor(FileDescriptor fd)
+			throws SerialException, SQLException {
 		if (!hasDescriptor(fd))
 			return false;
-		PreparedStatement statement = DatabaseManager.prepare("DELETE FROM File WHERE Identifier = ?;");
+		PreparedStatement statement = DatabaseManager
+				.prepare("DELETE FROM \"File\" WHERE \"identifier\" = ?;");
 		statement.setBytes(1, fd.getIdentifier().getBytes());
 		boolean result = statement.executeUpdate() > 0;
 		statement.close();
 		return result;
 	}
 
-	public static boolean hasDescriptor(FileDescriptor fd) throws SerialException, SQLException {
+	public static boolean hasDescriptor(FileDescriptor fd)
+			throws SerialException, SQLException {
 		PreparedStatement statement = DatabaseManager
-				.prepare("SELECT owner FROM File WHERE Identifier = ?;");
+				.prepare("SELECT \"owner\" FROM \"File\" WHERE \"identifier\" = ?;");
 		statement.setBytes(1, fd.getIdentifier().getBytes());
 		ResultSet result = statement.executeQuery();
 		DatabaseManager.registerResult(result, statement);

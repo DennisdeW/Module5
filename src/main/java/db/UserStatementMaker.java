@@ -24,7 +24,7 @@ public class UserStatementMaker {
 	public static int getId(String name) throws SQLException,
 			UnknownUserException {
 		PreparedStatement statement = DatabaseManager
-				.prepare("SELECT id FROM User WHERE Name = ?;");
+				.prepare("SELECT id FROM \"Users\" WHERE \"name\" = ?;");
 		statement.setString(1, name);
 		ResultSet result = statement.executeQuery();
 		DatabaseManager.registerResult(result, statement);
@@ -48,7 +48,7 @@ public class UserStatementMaker {
 	 */
 	public static ResultSet getUserData(int id) throws SQLException {
 		PreparedStatement statement = DatabaseManager
-				.prepare("SELECT * FROM User WHERE id = ?;");
+				.prepare("SELECT * FROM \"Users\" WHERE \"id\" = ?;");
 		statement.setInt(1, id);
 		ResultSet result = statement.executeQuery();
 		DatabaseManager.registerResult(result, statement);
@@ -69,7 +69,7 @@ public class UserStatementMaker {
 	public static byte[] getPass(int id) throws SQLException,
 			UnknownUserException {
 		PreparedStatement statement = DatabaseManager
-				.prepare("SELECT Pass FROM User WHERE id = ?;");
+				.prepare("SELECT \"pass\" FROM \"Users\" WHERE \"id\" = ?;");
 		statement.setInt(1, id);
 		ResultSet result = statement.executeQuery();
 		DatabaseManager.registerResult(result, statement);
@@ -95,7 +95,7 @@ public class UserStatementMaker {
 	public static byte[] saltPass(int id, byte[] pass) throws SQLException,
 			UnknownUserException {
 		PreparedStatement statement = DatabaseManager
-				.prepare("SELECT Salt FROM User WHERE id = ?;");
+				.prepare("SELECT \"salt\" FROM \"Users\" WHERE \"id\" = ?;");
 		statement.setInt(1, id);
 		ResultSet result = statement.executeQuery();
 		DatabaseManager.registerResult(result, statement);
@@ -130,13 +130,15 @@ public class UserStatementMaker {
 
 	/**
 	 * Deletes the account with this id
-	 * @param id The id of the user to delete
-	 * @return 
+	 * 
+	 * @param id
+	 *            The id of the user to delete
+	 * @return
 	 * @throws SQLException
 	 */
 	public static boolean deleteAccount(int id) throws SQLException {
 		PreparedStatement statement = DatabaseManager
-				.prepare("DELETE FROM User WHERE id = ?;");
+				.prepare("DELETE FROM \"Users\" WHERE \"id\" = ?;");
 		statement.setInt(1, id);
 		boolean result = statement.executeUpdate() > 0;
 		statement.close();
@@ -146,7 +148,7 @@ public class UserStatementMaker {
 	public static int createAccount(String name, byte[] pass)
 			throws SQLException {
 		PreparedStatement checkStatement = DatabaseManager
-				.prepare("SELECT * FROM User WHERE Name = ?;");
+				.prepare("SELECT * FROM \"Users\" WHERE \"name\" = ?;");
 		checkStatement.setString(1, name);
 		ResultSet checkResult = checkStatement.executeQuery();
 		DatabaseManager.registerResult(checkResult, checkStatement);
@@ -159,7 +161,8 @@ public class UserStatementMaker {
 		byte[] salt = generateSalt();
 
 		PreparedStatement statement = DatabaseManager
-				.prepare("INSERT INTO User VALUES (?, ?, ?, ?);");
+				.prepare("INSERT INTO \"Users\" (\"id\", \"name\", \"pass\", \"salt\")"
+						+ " VALUES (?, ?, ?, ?);");
 
 		byte[] salted = new byte[512];
 		byte[] raw = new byte[pass.length + salt.length];
@@ -189,7 +192,7 @@ public class UserStatementMaker {
 
 	private static final int getNextId() throws SQLException {
 		PreparedStatement statement = DatabaseManager
-				.prepare("SELECT MAX(Id) FROM User;");
+				.prepare("SELECT MAX(\"id\") FROM \"Users\";");
 		ResultSet result = statement.executeQuery();
 		DatabaseManager.registerResult(result, statement);
 		Tuple[] tuples = Tuple.fromResultSet(result);
