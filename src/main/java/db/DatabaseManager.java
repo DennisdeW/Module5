@@ -2,12 +2,9 @@ package db;
 
 import global.Logger;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Method;
 import java.sql.Connection;
@@ -96,12 +93,22 @@ public class DatabaseManager {
 	private static void decryptDB() {
 		String path = new File("").getAbsolutePath() + File.separatorChar;
 		try {
-			System.out.println(path + "db-e.sqlite");
 			Process proc = Runtime.getRuntime().exec(
 					"openssl aes-256-cbc -d -pass file:key.bin -in " + path
 							+ "db-e.sqlite -out " + path + "db.sqlite");
 			File db = new File("db.sqlite");
 			db.deleteOnExit();
+			proc.waitFor();
+		} catch (IOException | InterruptedException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	private static void encryptDB() {
+		String path = new File("").getAbsolutePath() + File.separatorChar;
+		try {
+			Process proc = Runtime.getRuntime().exec("openssl aes-256-cbc -e -pass file:key.bin -out " + path
+								+ "db-e.sqlite -out " + path + "db.sqlite");
 			proc.waitFor();
 		} catch (IOException | InterruptedException e) {
 			e.printStackTrace();
@@ -133,7 +140,7 @@ public class DatabaseManager {
 		FileInputStream fos = new FileInputStream(file);
 		byte[] key = new byte[65536];
 		fos.read(key);
-		
+		fos.close();
 		Logger.log("Keys match: " + Arrays.equals(buf, key));
 		
 		Statement s = DB_CONN.createStatement();
@@ -144,7 +151,11 @@ public class DatabaseManager {
 		r.close();
 		s.close();
 
-		System.out.println(UserStatementMaker.getId(name));
+		try {
+			System.out.println(UserStatementMaker.getId(name));
+		} catch (UnknownUserException e1) {
+			e1.printStackTrace();
+		}
 		System.out.println(activeResults.size() + ", "
 				+ activeStatements.size());
 		System.out.println();
@@ -175,6 +186,7 @@ public class DatabaseManager {
 	private static final class CleanupThread extends Thread {
 		public void run() {
 			Logger.log("Running Cleanup...");
+			encryptDB();
 			try {
 				for (ResultSet rs : activeResults.keySet())
 					clean(rs);
@@ -197,8 +209,16 @@ public class DatabaseManager {
 					}
 				});
 
+		/**
+		 * Gets a random key.
+		 * @param buf
+		 */
 		public void generateKey(byte[] buf);
 
+		/**
+		 * Gets the correct 64kiB key, to test against a supplied key file.
+		 * @param buf
+		 */
 		public void getKey(byte[] buf);
 	}
 

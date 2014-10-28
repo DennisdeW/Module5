@@ -25,6 +25,16 @@
 			<artifactId>platform</artifactId>
 			<version>3.5.2</version>
 		</dependency>
+		<dependency>
+			<groupId>org.bouncycastle</groupId>
+			<artifactId>bcprov-jdk15on</artifactId>
+			<version>1.51</version>
+		</dependency>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>4.12-beta-2</version>
+		</dependency>
 	</dependencies>
 	<build>
 		<plugins>
@@ -39,5 +49,4 @@
 			</plugin>
 		</plugins>
 	</build>
-
 </project>
