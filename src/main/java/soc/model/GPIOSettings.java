@@ -4,8 +4,10 @@ import java.lang.reflect.Field;
 
 import com.pi4j.io.gpio.GpioController;
 import com.pi4j.io.gpio.GpioPinDigitalInput;
+import com.pi4j.io.gpio.GpioPinDigitalMultipurpose;
 import com.pi4j.io.gpio.GpioPinDigitalOutput;
 import com.pi4j.io.gpio.Pin;
+import com.pi4j.io.gpio.PinMode;
 import com.pi4j.io.gpio.PinPullResistance;
 import com.pi4j.io.gpio.PinState;
 import com.pi4j.io.gpio.RaspiPin;
@@ -24,7 +26,7 @@ public class GPIOSettings {
 	
 	private GpioPinDigitalOutput commandPin;
 	private GpioPinDigitalOutput piActivePin;
-	private GpioPinDigitalInput de1ActivePin;
+	private GpioPinDigitalMultipurpose de1ActivePin;
 	
 	/**
 	 * Creates new GPIO settings.
@@ -128,9 +130,14 @@ public class GPIOSettings {
 	 * @param gpio the gpio object used
 	 * @return the pin
 	 */
-	public GpioPinDigitalInput getDe1ActivePin(GpioController gpio) {
+	public GpioPinDigitalMultipurpose getDe1ActivePin(GpioController gpio) {
 		if (de1ActivePin == null) {
-			de1ActivePin = getInPin(gpio, de1ActivePinNr);
+			try {
+				de1ActivePin = gpio.provisionDigitalMultipurposePin(
+						(Pin)getPinField(de1ActivePinNr).get(null), PinMode.DIGITAL_INPUT);
+			} catch (IllegalArgumentException | IllegalAccessException e) {
+				return null;
+			}
 		}
 		return de1ActivePin;
 	}
@@ -162,6 +169,7 @@ public class GPIOSettings {
 		commandPin.setShutdownOptions(true, PinState.LOW);
 		piActivePin.setShutdownOptions(true, PinState.LOW);
 		de1ActivePin.setShutdownOptions(true, PinState.LOW);
+		de1ActivePin.setMode(PinMode.DIGITAL_OUTPUT);
 		commandPin = null;
 		piActivePin = null;
 		de1ActivePin = null;

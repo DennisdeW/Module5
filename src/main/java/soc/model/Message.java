@@ -2,7 +2,6 @@ package soc.model;
 
 import global.Tools;
 
-import java.security.SecureRandom;
 import java.util.Arrays;
 
 /**
@@ -110,5 +109,21 @@ public class Message {
 				", actual size: " + actualSize + 
 				", data: " + Arrays.toString(messageData);
 	}
+	
+	/**
+	 * A string representation of the message which does not write out the
+	 * whole array of data.
+	 */	
+	public String toString(boolean compact) {
+		if (compact) {
+			return "Message - encrypted: " + encrypted + 
+					", actual size: " + actualSize + 
+					", data: " + messageData.length + " bytes";
+		} else {
+			return toString();
+		}
+
+	}
+	
 	
 }
