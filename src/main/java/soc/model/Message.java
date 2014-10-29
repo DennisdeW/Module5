@@ -1,5 +1,7 @@
 package soc.model;
 
+import global.Tools;
+
 import java.security.SecureRandom;
 import java.util.Arrays;
 
@@ -37,7 +39,7 @@ public class Message {
 		if ((missingBytes = (PACKET_SIZE - (data.length % PACKET_SIZE))) != 0) {
 			messageData = new byte[data.length + missingBytes];
 			System.arraycopy(data, 0, messageData, 0, data.length);
-			byte[] randomBuff = generateRandomBytes(missingBytes);
+			byte[] randomBuff = Tools.generateRandomBytes(missingBytes);
 			System.arraycopy(randomBuff, 0, messageData, data.length, randomBuff.length);
 		} else {
 			messageData = data;
@@ -62,44 +64,51 @@ public class Message {
 	}
 
 	/**
-	 * Gets the actual data 
-	 * @return
+	 * Gets the data of the message.
+	 *  
+	 * @return the data
 	 */
 	public byte[] getData() {
 		return messageData;
 	}
 	
+	/**
+	 * Gets the actual size of the data in bytes.<br>
+	 * 
+	 * @return the actual size
+	 */
 	public int getActualSize() {
 		return actualSize;
 	}
 	
+	/**
+	 * Gets whether the data is encrypted or not.
+	 * 
+	 * @return whether the data is encrypted or not
+	 */
 	public boolean isEncrypted() {
 		return encrypted;
 	}
 	
+	/**
+	 * Sets whether the data is encrypted or not.<br>
+	 * Should only be used when it is actually encrypted or decrypted by 
+	 * the DE1.
+	 * 
+	 * @param encrypted whether the data is encrypted or not
+	 */
 	public void setEncrypted(boolean encrypted) {
 		this.encrypted = encrypted;
 	}
 	
+	/**
+	 * A string representation of the message.
+	 */
 	@Override
 	public String toString() {
 		return "Message - encrypted: " + encrypted + 
 				", actual size: " + actualSize + 
 				", data: " + Arrays.toString(messageData);
-	}
-	
-	/**
-	 * Generates a secure random array of bytes.
-	 * 
-	 * @param amount of bytes to generate
-	 * @return the random bytes
-	 */
-	private byte[] generateRandomBytes(int amount) {
-		byte[] buff = new byte[amount];
-		byte[] seed = (System.nanoTime() + "").getBytes();
-		SecureRandom random = new SecureRandom(seed);
-		random.nextBytes(buff);
-		return buff;
 	}
 	
 }

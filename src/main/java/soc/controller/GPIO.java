@@ -16,11 +16,20 @@ import com.pi4j.io.gpio.GpioFactory;
 import com.pi4j.io.gpio.GpioPinDigitalInput;
 import com.pi4j.io.gpio.GpioPinDigitalOutput;
 import com.pi4j.io.gpio.Pin;
+import com.pi4j.io.gpio.PinMode;
 import com.pi4j.io.gpio.PinPullResistance;
 import com.pi4j.io.gpio.PinState;
 import com.pi4j.io.gpio.RaspiPin;
 import com.pi4j.wiringpi.Spi;
 
+/**
+ * Represents the connection between the Pi and the DE1 SoC.<br>
+ * It can be used to encrypt or decrypt data and in the future also for
+ * compressing the data.
+ * 
+ * @author rvemous
+ *
+ */
 public class GPIO {
     
 	private static ReentrantLock lock;
@@ -28,6 +37,11 @@ public class GPIO {
 	
 	private GPIOSettings settings;
 	
+	/**
+	 * Creates a new gpio connection.
+	 *  
+	 * @param settings the settings to use
+	 */
 	public GPIO(GPIOSettings settings) {
 		if (lock == null) {
 			lock = new ReentrantLock();
@@ -40,11 +54,21 @@ public class GPIO {
 		}
 		this.settings = settings;
 	}
-	
+
+	/**
+	 * Gets the gpio settings.
+	 * 
+	 * @return the settings
+	 */
 	public GPIOSettings getSettings() {
 		return settings;
 	}
 	
+	/**
+	 * Sets the gpio settings.
+	 * 
+	 * @param settings to use
+	 */
 	public synchronized void setSettings(GPIOSettings settings) {
 		this.settings = settings;
 	}	
@@ -115,7 +139,7 @@ public class GPIO {
 				Logger.logError("Timed out" + Arrays.toString(buffer));	
 				System.out.println("Timed out" + Arrays.toString(buffer));	
 				// tell the DE1 the Pi is done sending
-				System.out.println("Set pi active pin to low");
+				System.out.println("Set pi active pin to 0");
 				settings.getPiActivePin(GPIO).low();
 		        System.out.println("Done.");
 		        releaseLock();
@@ -150,7 +174,7 @@ public class GPIO {
 			}
 		}
 		// tell the DE1 the Pi is done sending
-		System.out.println("Set pi active pin to low");
+		System.out.println("Set pi active pin to 0");
 		settings.getPiActivePin(GPIO).low();
         System.out.println("Done.");
         releaseLock();
@@ -213,6 +237,7 @@ public class GPIO {
 	 * Safely shuts down all GPIO services.
 	 */
 	public void shutdown() {
+		settings.reset();
 		GPIO.shutdown();
 	}
 	

@@ -1,5 +1,7 @@
 package global;
 
+import java.security.SecureRandom;
+
 /**
  * Helper class for globally usable tools.
  * 
@@ -48,5 +50,20 @@ public class Tools {
 	public static void waitForNs(long sleepTime) {
 		long currTime = System.nanoTime();
 		while (System.nanoTime() - currTime <= sleepTime);
+	}
+	
+	
+	/**
+	 * Generates a secure random array of bytes.
+	 * 
+	 * @param amount of bytes to generate
+	 * @return the random bytes
+	 */
+	public static byte[] generateRandomBytes(int amount) {
+		byte[] buff = new byte[amount];
+		byte[] seed = (System.nanoTime() + "").getBytes();
+		SecureRandom random = new SecureRandom(seed);
+		random.nextBytes(buff);
+		return buff;
 	}
 }

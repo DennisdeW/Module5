@@ -65,14 +65,21 @@ public class GPIOSettings {
 		piActiveWaitTime = 100; //0.1 ms
 	}
 	
+	/**
+	 * Gets the pin number used for the command pin.
+	 * 
+	 * @return the pin number
+	 */
 	public int getCommandPinNr() {
 		return commandPinNr;
 	}
 	
 	/**
 	 * Gets the pin used tell the DE1 whether to encrypt or decrypt the 
-	 * data.
+	 * data.<br>
+	 * On the first usage the pin will be created.
 	 * 
+	 * @param gpio the gpio object used
 	 * @return the pin
 	 */
 	public GpioPinDigitalOutput getCommandPin(GpioController gpio) {
@@ -81,14 +88,21 @@ public class GPIOSettings {
 		}
 		return commandPin;
 	}
-	
+
+	/**
+	 * Gets the pin number used for the Pi active pin.
+	 * 
+	 * @return the pin number
+	 */
 	public int getPiActivePinNr() {
 		return piActivePinNr;
 	}
 
 	/**
-	 * Gets the pin used tell the DE1 whether the Pi is sending.
+	 * Gets the pin used tell the DE1 whether the Pi is sending.<br>
+	 * On the first usage the pin will be created.
 	 * 
+	 * @param gpio the gpio object used
 	 * @return the pin
 	 */
 	public GpioPinDigitalOutput getPiActivePin(GpioController gpio) {
@@ -97,14 +111,21 @@ public class GPIOSettings {
 		}
 		return piActivePin;
 	}
-	
+
+	/**
+	 * Gets the pin number used for the DE1 active pin.
+	 * 
+	 * @return the pin number
+	 */
 	public int getDe1ActivePinNr() {
 		return de1ActivePinNr;
 	}
 
 	/**
-	 * Gets the pin used tell the Pi whether the DE1 is sending.
+	 * Gets the pin used tell the Pi whether the DE1 is sending.<br>
+	 * On the first usage the pin will be created.
 	 * 
+	 * @param gpio the gpio object used
 	 * @return the pin
 	 */
 	public GpioPinDigitalInput getDe1ActivePin(GpioController gpio) {
@@ -132,6 +153,18 @@ public class GPIOSettings {
 	 */	
 	public void setPiActiveWaitTime(long piActiveWaitTime) {
 		this.piActiveWaitTime = piActiveWaitTime;
+	}
+	
+	/**
+	 * Resets the state of the settings and unloads all pins.
+	 */
+	public void reset() {
+		commandPin.setShutdownOptions(true, PinState.LOW);
+		piActivePin.setShutdownOptions(true, PinState.LOW);
+		de1ActivePin.setShutdownOptions(true, PinState.LOW);
+		commandPin = null;
+		piActivePin = null;
+		de1ActivePin = null;
 	}
 	
 	/**
