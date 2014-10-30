@@ -1,5 +1,6 @@
 package ssh;
 
+import files.FileSystemManager;
 import global.Logger;
 
 import java.io.File;
@@ -17,6 +18,7 @@ import org.apache.sshd.server.sftp.SftpSubsystem;
 
 import ssh.command.PiCommandFactory;
 import ssh.sftp.PiFileSystemFactory;
+
 /*
  import org.apache.sshd.server.shell.InvertedShell;
  import org.apache.sshd.server.shell.InvertedShellWrapper;
@@ -106,6 +108,7 @@ public class SSHManager {
 
 	public static void main(String[] args) throws IOException {
 		Logger.init();
+		FileSystemManager.init();
 		// Runtime.getRuntime().exec("C:\\Users\\Dennis\\Desktop\\putty.exe");
 		start();
 		try {

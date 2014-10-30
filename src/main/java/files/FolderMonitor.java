@@ -16,9 +16,12 @@ import java.nio.file.WatchKey;
 import java.nio.file.WatchService;
 import java.sql.SQLException;
 import java.util.ArrayDeque;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Observable;
 import java.util.Queue;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 import ssh.sftp.PiFileSystemFactory;
 import db.UserStatementMaker;
@@ -32,15 +35,31 @@ import db.UserStatementMaker;
  */
 public class FolderMonitor extends Observable implements Runnable {
 
+	public static final Set<FolderMonitor> MONITORS;
+	private static final Set<Thread> THREADS;
+
+	static {
+		MONITORS = new HashSet<>();
+		THREADS = new HashSet<>();
+		initialiseMonitors();
+	}
+
 	/**
 	 * This should be called when the program starts to put monitors on all
 	 * existing users' directories.
 	 */
 	public static void initialiseMonitors() {
+		Logger.log("Starting Monitors...");
 		PiFileSystemFactory.init();
 		try {
 			List<String> names = UserStatementMaker.getUserNameList();
-			names.forEach(n -> new Thread(new FolderMonitor(n)).start());
+			names.forEach(n -> {
+				FolderMonitor mon = new FolderMonitor(n);
+				MONITORS.add(mon);
+				Thread t = new Thread(mon);
+				THREADS.add(t);
+				t.start();
+			});
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
@@ -50,12 +69,31 @@ public class FolderMonitor extends Observable implements Runnable {
 	 * This should be called when a new user is added.
 	 */
 	public static void registerNewDirectory(String user) {
-		new Thread(new FolderMonitor(user)).start();
+		FolderMonitor mon = new FolderMonitor(user);
+		Thread t = new Thread(mon);
+		MONITORS.add(mon);
+		THREADS.add(t);
+		t.start();
+	}
+
+	/**
+	 * Stops all monitor threads.
+	 */
+	public static void stopMonitors() {
+		MONITORS.forEach(m -> m.stop());
+		MONITORS.clear();
+		THREADS.forEach(t -> {
+			try {
+				t.join();
+			} catch (Exception e) {
+			}
+		});
 	}
 
 	private WatchService service;
 	private Queue<Event> events;
 	private Path basePath;
+	private boolean stop = false;
 
 	/**
 	 * You should create these using the static methods above.
@@ -68,6 +106,7 @@ public class FolderMonitor extends Observable implements Runnable {
 			service = FileSystems.getDefault().newWatchService();
 			basePath.register(service, ENTRY_CREATE, ENTRY_MODIFY,
 					ENTRY_DELETE, OVERFLOW);
+			Logger.log("Monitor created for " + user + " on " + basePath);
 		} catch (IOException e) {
 			Logger.logError("Unable to create WatchService for " + user + ":");
 			Logger.logError(e);
@@ -96,15 +135,15 @@ public class FolderMonitor extends Observable implements Runnable {
 
 	@Override
 	public void run() {
-		while (true) {
+		while (!stop) {
 			try {
-				//take() blocks until a key is available.
-				WatchKey key = service.take();
+				// waits 1 second unless a key is available.
+				WatchKey key = service.poll(1, TimeUnit.SECONDS);
 				List<WatchEvent<?>> events = key.pollEvents();
 				for (WatchEvent<?> ev : events) {
 					WatchEvent.Kind<?> type = ev.kind();
 
-					//Overflow means that an event was missed.
+					// Overflow means that an event was missed.
 					if (type == OVERFLOW) {
 						Logger.logError("An overflow occured in one of the FolderMonitors!");
 						continue;
@@ -116,8 +155,13 @@ public class FolderMonitor extends Observable implements Runnable {
 				}
 			} catch (InterruptedException | ClosedWatchServiceException e) {
 				Logger.logError(e);
+				continue;
 			}
 		}
+	}
+
+	private void stop() {
+		stop = true;
 	}
 
 	/**
