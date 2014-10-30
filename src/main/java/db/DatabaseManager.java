@@ -36,7 +36,7 @@ public class DatabaseManager {
 
 	private static final Connection DB_CONN;
 	/**
-	 * Always update activeResults when returing a ResultSet. Volatile because
+	 * Always update activeResults when returning a ResultSet. Volatile because
 	 * WeakReferences may become invalid.
 	 */
 	private static volatile Map<ResultSet, WeakReference<PreparedStatement>> activeResults;
