@@ -1,14 +1,15 @@
 package ssh.command;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.List;
 
-import org.apache.sshd.server.Command;
 import org.apache.sshd.server.Environment;
-import org.apache.sshd.server.ExitCallback;
 
+/**
+ * Debug command.
+ * @author Dennis
+ *
+ */
 public class TestCommand extends PiCommand {
 
 	public TestCommand(List<String> args) {

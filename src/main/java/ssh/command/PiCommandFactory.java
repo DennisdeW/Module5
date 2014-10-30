@@ -9,6 +9,11 @@ import org.apache.sshd.server.ExitCallback;
 
 import ssh.command.PiCommand.PiCommandType;
 
+/**
+ * Factory which causes commands to be processed by the PiCommandType enum.
+ * @author Dennis
+ *
+ */
 public class PiCommandFactory implements CommandFactory {
 	private final InputStream in;
 	private final OutputStream out, err;

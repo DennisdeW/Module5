@@ -1,9 +1,12 @@
 package ssh;
 
-import global.Logger;
-
 import org.apache.sshd.server.ExitCallback;
 
+/**
+ * Doesn't do anything. Even Apache MINA staff don't use the callbacks...
+ * @author Dennis
+ *
+ */
 public class DefaultExitCallback implements ExitCallback {
 
 	@Override

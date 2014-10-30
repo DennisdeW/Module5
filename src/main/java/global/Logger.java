@@ -6,6 +6,7 @@ import java.io.IOException;
 
 public final class Logger implements Thread.UncaughtExceptionHandler {
 
+	@SuppressWarnings("unused")
 	private static final File LOG;
 	private static final FileWriter WRITER;
 	private static final long START_TIMESTAMP;

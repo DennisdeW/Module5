@@ -5,6 +5,11 @@ import java.util.List;
 
 import org.apache.sshd.server.Environment;
 
+/**
+ * Dummy command to avoid crashes when an unkown command is sent.
+ * @author Dennis
+ *
+ */
 public class DummyCommand extends PiCommand {
 
 	public DummyCommand(List<String> args) {

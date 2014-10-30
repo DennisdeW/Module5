@@ -6,15 +6,19 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
+import java.util.List;
 
 import org.apache.sshd.server.Command;
-import org.apache.sshd.server.Environment;
 import org.apache.sshd.server.ExitCallback;
 
 import ssh.SSHManager;
 
-import java.util.List;
-
+/**
+ * Base class for commands.
+ * 
+ * @author Dennis
+ *
+ */
 public abstract class PiCommand implements Command {
 
 	protected InputStream in;
@@ -23,8 +27,6 @@ public abstract class PiCommand implements Command {
 	protected String[] args;
 
 	public PiCommand(List<String> args) {
-		System.out.println("PiCommand.PiCommand()");
-		System.out.println(args.toString());
 		this.args = args.toArray(new String[] {});
 	}
 
@@ -35,7 +37,6 @@ public abstract class PiCommand implements Command {
 
 	public PiCommand(String[] args, InputStream in, OutputStream out,
 			OutputStream err, ExitCallback exit) {
-		System.out.println("PiCommand.PiCommand()");
 		this.args = args;
 		this.in = in;
 		this.out = out;
@@ -47,41 +48,50 @@ public abstract class PiCommand implements Command {
 
 	@Override
 	public void setInputStream(InputStream in) {
-		System.out.println("PiCommand.setInputStream()");
 		this.in = in;
 	}
 
 	@Override
 	public void setOutputStream(OutputStream out) {
-		System.out.println("PiCommand.setOutputStream()");
 		this.out = out;
 	}
 
 	@Override
 	public void setErrorStream(OutputStream err) {
-		System.out.println("PiCommand.setErrorStream()");
 		this.err = err;
 	}
 
 	@Override
 	public void setExitCallback(ExitCallback callback) {
-		System.out.println("PiCommand.setExitCallback()");
 		this.exit = callback;
 	}
 
+	/**
+	 * Enum which contains all implemented commands.
+	 * 
+	 * @author Dennis
+	 *
+	 */
 	public enum PiCommandType {
 		TEST("test", TestCommand.class), GET_USER("user", GetUserCommand.class), CREATE_USER(
-				"create", CreateUserCommand.class), DUMMY("", DummyCommand.class);
+				"create", CreateUserCommand.class), DUMMY("",
+				DummyCommand.class);
 
 		private String command;
 		private Class<? extends PiCommand> clazz;
 
+		/**
+		 * @param command
+		 *            The string to recognize this command by.
+		 * @param clazz
+		 *            The underlying class for this command.
+		 */
 		PiCommandType(String command, Class<? extends PiCommand> clazz) {
 			this.command = command;
 			this.clazz = clazz;
 		}
 
-		public PiCommand _getCommand(String args) {
+		private PiCommand _getCommand(String args) {
 			System.out.println("PiCommand.PiCommandType.getCommand()");
 			PiCommand comm = null;
 			try {
@@ -96,7 +106,7 @@ public abstract class PiCommand implements Command {
 			return comm;
 		}
 
-		public PiCommand _getCommand(String args, InputStream in,
+		private PiCommand _getCommand(String args, InputStream in,
 				OutputStream out, OutputStream err, ExitCallback exit) {
 			System.out.println("PiCommand.PiCommandType.getCommand()");
 			PiCommand comm = null;
@@ -122,6 +132,14 @@ public abstract class PiCommand implements Command {
 			return comm;
 		}
 
+		/**
+		 * Get the enum constant backing the given command string.
+		 * 
+		 * @param command
+		 *            The command to search for, <b>without arguments</b>
+		 * @return The enum constant which has the class for this command, or
+		 *         DUMMY when the command is not recognized.
+		 */
 		public static PiCommandType typeOf(String command) {
 			for (PiCommandType type : values())
 				if (type.command.equalsIgnoreCase(command))
@@ -129,6 +147,13 @@ public abstract class PiCommand implements Command {
 			return DUMMY;
 		}
 
+		/**
+		 * Gets the command which is bound to the given string.<br>
+		 * Commands should be structured as follows:<br>
+		 * <i>command-arg1-arg2-...-argN</i>
+		 * @param command The command with arguments, as above.
+		 * @return The command, supplied with the arguments.
+		 */
 		public static PiCommand getCommand(String command) {
 			System.out.println("PiCommand.PiCommandType.getCommand()");
 			Logger.log("Received Command: " + command + " (sender="

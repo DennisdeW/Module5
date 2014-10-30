@@ -16,6 +16,9 @@ public class Authenticator implements PasswordAuthenticator {
 	public static final String DEFAULT_USER = "Guest", DEFAULT_PASS = "Guest";
 
 	@Override
+	/**
+	 * Checks whether a user has supplied valid credentials
+	 */
 	public boolean authenticate(String username, String password,
 			ServerSession session) {
 		if (username.equals(DEFAULT_USER) && password.equals(DEFAULT_PASS)) {

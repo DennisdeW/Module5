@@ -11,6 +11,7 @@ import org.apache.sshd.common.file.nativefs.NativeSshFile;
 
 import ssh.SSHManager;
 
+@Deprecated
 public class PiFileSystemView extends NativeFileSystemView {
 
 	private Map<String, String> roots;

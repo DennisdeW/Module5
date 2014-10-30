@@ -3,42 +3,38 @@ package ssh.sftp;
 import global.Logger;
 
 import java.io.File;
-import java.io.IOException;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.sshd.common.Session;
-import org.apache.sshd.common.file.FileSystemFactory;
-import org.apache.sshd.common.file.FileSystemView;
-import org.apache.sshd.common.file.nativefs.NativeFileSystemView;
 import org.apache.sshd.common.file.virtualfs.VirtualFileSystemFactory;
-
-import ssh.SSHManager;
-
-import com.sun.jna.Platform;
 
 import db.UserStatementMaker;
 
+/**
+ * Creates, sets and maintains the virtual file systems the users can access.<br>
+ * These directories are essentially chroot'ed: they will appear to the user as
+ * '/', but will actually be in another location, specified by the user's name.
+ * 
+ * @author Dennis
+ *
+ */
 public class PiFileSystemFactory extends VirtualFileSystemFactory {
 
+	/**
+	 * The absolute locations of the users home directories.
+	 */
 	public static Map<String, String> homeDirs;
 
 	static {
 		new PiFileSystemFactory().setUserDirs();
 	}
 
-	/*
-	 * @Override protected String computeRootDir(String userName) { File f = new
-	 * File(new File("").getAbsolutePath() + File.separator + "storage" +
-	 * File.separator + userName); f.mkdirs(); return new
-	 * File("").getAbsolutePath() + File.separator + "storage" + File.separator
-	 * + userName; }
-	 */
 	public PiFileSystemFactory() {
 		super();
-		setUserDirs();
+		setUserDirs(); // Shouldn't be necessary as the initializer already
+						// calls this, but the server crashes without it...
 	}
 
 	private void setUserDirs() {
@@ -64,6 +60,9 @@ public class PiFileSystemFactory extends VirtualFileSystemFactory {
 		setDefaultHomeDir(new File("").getAbsolutePath() + "/");
 	}
 
+	/**
+	 * Does nothing, but ensures that the initializer is run.
+	 */
 	public static void init() {
 	}
 }

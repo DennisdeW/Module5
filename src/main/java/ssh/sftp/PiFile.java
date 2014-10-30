@@ -7,6 +7,11 @@ import java.io.File;
 import org.apache.sshd.common.file.nativefs.NativeFileSystemView;
 import org.apache.sshd.common.file.nativefs.NativeSshFile;
 
+/**
+ * This is exactly the same as a NativeSshFile, except that it creates log entries. Not used.
+ * @author Dennis
+ *
+ */
 public class PiFile extends NativeSshFile {
 
 	protected PiFile(NativeFileSystemView nativeFileSystemView,

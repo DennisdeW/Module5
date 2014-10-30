@@ -3,30 +3,20 @@ package ssh;
 import global.Logger;
 
 import java.io.File;
-import java.io.FilterInputStream;
-import java.io.FilterOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.sshd.SshServer;
-import org.apache.sshd.common.Factory;
 import org.apache.sshd.common.NamedFactory;
 import org.apache.sshd.common.Session;
-import org.apache.sshd.common.file.nativefs.NativeFileSystemFactory;
-import org.apache.sshd.common.file.virtualfs.VirtualFileSystemFactory;
-import org.apache.sshd.common.util.Buffer;
 import org.apache.sshd.server.Command;
 import org.apache.sshd.server.command.ScpCommandFactory;
 import org.apache.sshd.server.keyprovider.SimpleGeneratorHostKeyProvider;
 import org.apache.sshd.server.sftp.SftpSubsystem;
-import org.apache.sshd.server.shell.InvertedShell;
-import org.apache.sshd.server.shell.InvertedShellWrapper;
-import org.apache.sshd.server.shell.ProcessShellFactory;
 
+import ssh.command.PiCommandFactory;
+import ssh.sftp.PiFileSystemFactory;
 /*
  import org.apache.sshd.server.shell.InvertedShell;
  import org.apache.sshd.server.shell.InvertedShellWrapper;
@@ -39,47 +29,56 @@ import org.apache.sshd.server.shell.ProcessShellFactory;
  import java.io.FilterInputStream;
  import java.io.FilterOutputStream;
  */
-
-
-
-
-
-
-
-
-
-
-
 import com.sun.jna.Platform;
 
-import ssh.command.PiCommandFactory;
-import ssh.sftp.PiFileSystemFactory;
-import ssh.sftp.PiSFTPFactory;
-
+/**
+ * Controller for the SSH/SFTP server
+ * 
+ * @author Dennis
+ *
+ */
 public class SSHManager {
 
+	/**
+	 * The server that handles all SSH communication, including SFTP
+	 */
 	private static final SshServer SSH;
+
+	/**
+	 * Indicates whether the logged-in user is the guest account, which can only
+	 * be used to create new accounts.
+	 */
 	public static boolean limitedUser = false;
+
+	/**
+	 * The name of the active user
+	 */
 	public static String username = null;
+
+	/**
+	 * The active session
+	 */
 	public static Session session = null;
 
 	static {
 		SSH = SshServer.setUpDefaultServer();
 		SSH.setPort(20022);
 		SSH.setPasswordAuthenticator(new Authenticator());
-		//SSH.setShellFactory(new ProcessShellFactory(getShellString()));
 		SSH.setCommandFactory(new ScpCommandFactory(new PiCommandFactory()));
+		// Probably has to change
 		SSH.setHost("localhost");
 		SSH.setKeyPairProvider(new SimpleGeneratorHostKeyProvider("hostkey.ser"));
-		//VirtualFileSystemFactory fsf = new VirtualFileSystemFactory();
-		//SSH.setFileSystemFactory(fsf);
 		SSH.setFileSystemFactory(new PiFileSystemFactory());
+
+		// Add the SFTP subsystem
 		List<NamedFactory<Command>> subSystemList = new ArrayList<>();
-		//subSystemList.add(new PiSFTPFactory());
 		subSystemList.add(new SftpSubsystem.Factory());
 		SSH.setSubsystemFactories(subSystemList);
 	}
 
+	/**
+	 * Start the server
+	 */
 	public static void start() {
 		Logger.log("Starting SSH server on port 20022.");
 		try {
@@ -91,6 +90,9 @@ public class SSHManager {
 		Logger.log("SSH started.");
 	}
 
+	/**
+	 * Stop the server
+	 */
 	public static void stop() {
 		Logger.log("Stopping SSH server.");
 		try {
@@ -104,7 +106,7 @@ public class SSHManager {
 
 	public static void main(String[] args) throws IOException {
 		Logger.init();
-		//Runtime.getRuntime().exec("C:\\Users\\Dennis\\Desktop\\putty.exe");
+		// Runtime.getRuntime().exec("C:\\Users\\Dennis\\Desktop\\putty.exe");
 		start();
 		try {
 			Thread.sleep(180000);
@@ -114,7 +116,10 @@ public class SSHManager {
 		stop();
 	}
 
-	
+	/**
+	 * Get a platform-specific command to open a shell. Not used.
+	 * @return
+	 */
 	@SuppressWarnings("unused")
 	private static String[] getShellString() {
 		if (Platform.isWindows())

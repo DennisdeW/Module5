@@ -11,13 +11,27 @@ import org.apache.sshd.server.Environment;
 import db.UnknownUserException;
 import db.UserStatementMaker;
 
+/**
+ * Command to create a new user.
+ * @author Dennis
+ *
+ */
 public class CreateUserCommand extends PiCommand {
 
+	/**
+	 * Needs three arguments:<br>
+	 * -The command name (by default) <br>
+	 * -The new user's name.<br>
+	 * -The new user's password.<br> 
+	 * @param args A list of the above arguments.
+	 */
 	public CreateUserCommand(List<String> args) {
 		super(args);
 	}
 
-	@Override
+	/**
+	 * Runs the command.
+	 */
 	public void start(Environment env) throws IOException {
 		if (!canRun())
 			return;
@@ -32,7 +46,6 @@ public class CreateUserCommand extends PiCommand {
 
 	@Override
 	public void destroy() {
-		// TODO Auto-generated method stub
 
 	}
 
