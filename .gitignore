@@ -1,5 +1,6 @@
 piCloud.log
 target/*
+storage/*
 !target/classes/
 target/classes/*
 !target/classes/PiCloudKeyStore.dll

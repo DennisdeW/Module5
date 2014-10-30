@@ -1,5 +1,6 @@
 package ssh.command;
 
+import files.FileSystemManager;
 import global.Logger;
 
 import java.io.IOException;
@@ -8,6 +9,7 @@ import java.util.List;
 
 import org.apache.sshd.server.Environment;
 
+import ssh.sftp.PiFileSystemFactory;
 import db.UnknownUserException;
 import db.UserStatementMaker;
 
@@ -39,6 +41,8 @@ public class CreateUserCommand extends PiCommand {
 			UserStatementMaker.createAccount(args[1], args[2].getBytes());
 			Logger.log("New user account created: " + args[1] + " -- id="
 					+ UserStatementMaker.getId(args[1]));
+			PiFileSystemFactory.register(args[1]);
+			FileSystemManager.register(args[1]);
 		} catch (SQLException | UnknownUserException e) {
 			Logger.logError("Failed to create user: " + e);
 		}

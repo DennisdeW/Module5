@@ -57,6 +57,7 @@ public class FolderMonitor extends Observable implements Runnable {
 				FolderMonitor mon = new FolderMonitor(n);
 				MONITORS.add(mon);
 				Thread t = new Thread(mon);
+				t.setName("FolderMonitor-" + n);
 				THREADS.add(t);
 				t.start();
 			});
@@ -139,6 +140,8 @@ public class FolderMonitor extends Observable implements Runnable {
 			try {
 				// waits 1 second unless a key is available.
 				WatchKey key = service.poll(1, TimeUnit.SECONDS);
+				if (key == null)
+					continue;
 				List<WatchEvent<?>> events = key.pollEvents();
 				for (WatchEvent<?> ev : events) {
 					WatchEvent.Kind<?> type = ev.kind();

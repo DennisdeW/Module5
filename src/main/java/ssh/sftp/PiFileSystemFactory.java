@@ -26,12 +26,14 @@ public class PiFileSystemFactory extends VirtualFileSystemFactory {
 	 * The absolute locations of the users home directories.
 	 */
 	public static Map<String, String> homeDirs;
+	public static final PiFileSystemFactory INSTANCE;
 
 	static {
-		new PiFileSystemFactory().setUserDirs();
+		INSTANCE = new PiFileSystemFactory();
+		INSTANCE.setUserDirs();
 	}
 
-	public PiFileSystemFactory() {
+	private PiFileSystemFactory() {
 		super();
 		setUserDirs(); // Shouldn't be necessary as the initializer already
 						// calls this, but the server crashes without it...
@@ -48,15 +50,20 @@ public class PiFileSystemFactory extends VirtualFileSystemFactory {
 			e.printStackTrace();
 		}
 		names.forEach(n -> {
-			setUserHomeDir(n, base + "/storage/" + n);
-			homeDirs.put(n, base + "/storage/" + n);
-			if (new File(base + "/storage/" + n).mkdirs())
-				Logger.log("Created new User Storage Folder for " + n);
+			String sandbox = base + "/storage/" + n;
+			setUserHomeDir(n, sandbox);
+			homeDirs.put(n, sandbox);
+			if (new File(sandbox).mkdirs())
+				Logger.log("Created new User Storage Folder for " + n + " at " + sandbox);
+			else
+				Logger.log("Opened existing sandbox for " + n + " at " + sandbox);
 		});
 		setUserHomeDir("Guest", base + "/storage/Guest");
 		homeDirs.put("Guest", base + "/storage/Guest");
 		if (new File(base + "/storage/Guest").mkdirs())
 			Logger.log("Created new User Storage Folder for Guest");
+		else
+			Logger.log("Opened existing sandbox for Guest");
 		setDefaultHomeDir(new File("").getAbsolutePath() + "/");
 	}
 
@@ -64,5 +71,14 @@ public class PiFileSystemFactory extends VirtualFileSystemFactory {
 	 * Does nothing, but ensures that the initializer is run.
 	 */
 	public static void init() {
+		Logger.log("Starting PiFileSystemFactory...");
+	}
+
+	public static void register(String user) {
+		String sandbox = new File("").getAbsolutePath() + "/storage/" + user;
+		new File(sandbox).mkdirs();
+		Logger.log("Created new folder for " + user + " at " + sandbox);
+		INSTANCE.setUserHomeDir(user, sandbox);
+		homeDirs.put(user, sandbox);
 	}
 }

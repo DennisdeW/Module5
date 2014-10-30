@@ -21,10 +21,12 @@ public class Authenticator implements PasswordAuthenticator {
 	 */
 	public boolean authenticate(String username, String password,
 			ServerSession session) {
+		renameThread();
 		if (username.equals(DEFAULT_USER) && password.equals(DEFAULT_PASS)) {
 			SSHManager.limitedUser = true;
 			SSHManager.username = DEFAULT_USER;
 			SSHManager.session = session;
+			Logger.log("Successful Guest login");
 			return true;
 		}
 
@@ -51,6 +53,14 @@ public class Authenticator implements PasswordAuthenticator {
 					+ " (passwords did not match)");
 
 		return valid;
+	}
+	
+	private static void renameThread() {
+		String cur = Thread.currentThread().getName();
+		if (cur.contains("sshd")) {
+			char lastchar = cur.charAt(cur.length() - 1);
+			Thread.currentThread().setName("SSH Session " + lastchar);
+		}
 	}
 
 }

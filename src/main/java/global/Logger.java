@@ -6,7 +6,7 @@ import java.io.IOException;
 
 public final class Logger implements Thread.UncaughtExceptionHandler {
 
-	private static final String NEW_LINE;
+	private static final String NEW_LINE = System.lineSeparator();
 
 	@SuppressWarnings("unused")
 	private static final File LOG;
@@ -25,7 +25,6 @@ public final class Logger implements Thread.UncaughtExceptionHandler {
 			e.printStackTrace();
 			System.exit(1);
 		}
-		NEW_LINE = System.lineSeparator();
 		LOG = l;
 		WRITER = fw;
 		START_TIMESTAMP = System.currentTimeMillis();
@@ -39,7 +38,7 @@ public final class Logger implements Thread.UncaughtExceptionHandler {
 	}
 
 	public static synchronized void log(String message) {
-		String log = "[+" + currentTime() + "] " + message + NEW_LINE;
+		String log = getPrefix() + message + NEW_LINE;
 		try {
 			WRITER.write(log);
 			WRITER.flush();
@@ -49,8 +48,8 @@ public final class Logger implements Thread.UncaughtExceptionHandler {
 	}
 
 	public static synchronized void logError(String message) {
-		String log = NEW_LINE + ">>>[+" + currentTime() + "] ERROR:" + 
-					message + "<<<" + NEW_LINE;
+		String log = NEW_LINE + ">>>" + getPrefix() + " ERROR:" + message
+				+ "<<<" + NEW_LINE;
 		try {
 			WRITER.write(log);
 			WRITER.flush();
@@ -61,6 +60,11 @@ public final class Logger implements Thread.UncaughtExceptionHandler {
 
 	public static synchronized void logError(Throwable t) {
 		logError(getStackTraceString((t)));
+	}
+
+	private static String getPrefix() {
+		return "[" + Thread.currentThread().getName() + "+" + currentTime()
+				+ "]\t\t\t\t\t";
 	}
 
 	private static String getStackTraceString(Throwable e) {

@@ -24,6 +24,12 @@ import com.pi4j.wiringpi.Spi;
  */
 public class SocManager {
     
+	private static final int DEFAULT_CONNECTION_SPEED = 32000000;
+
+	private static final int DEFAULT_BUFFER_SIZE = 1000;
+
+	public static SocManager instance;
+	
 	private static ReentrantLock lock;
 	private static GpioController GPIO;
 	
@@ -248,6 +254,11 @@ public class SocManager {
 		int timeOut = args.length > 4 ? Integer.parseInt(args[4]) : 1000;
 		boolean selfTest = args.length > 5 ? Boolean.parseBoolean(args[5]) : true;
 		SocManagerTest.testSocManager(sendSpeed, packetSize, fileSize, bufferSize, timeOut, selfTest);
+	}
+	
+	public static void init() {
+		GPIOSettings settings = new GPIOSettings();
+		instance = new SocManager(settings, DEFAULT_CONNECTION_SPEED, DEFAULT_BUFFER_SIZE);
 	}
 
 }
