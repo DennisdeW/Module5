@@ -8,6 +8,7 @@ import ssh.SSHManager;
 
 /**
  * Sets up the SFTP subsystem with the correct FileSystemFactory.
+ * 
  * @author Dennis
  *
  */
@@ -17,7 +18,7 @@ public class PiSFTPFactory implements NamedFactory<Command> {
 	public Command create() {
 		SftpSubsystem sftp = (SftpSubsystem) new SftpSubsystem.Factory()
 				.create();
-		sftp.setFileSystemView(new PiFileSystemFactory()
+		sftp.setFileSystemView(PiFileSystemFactory.INSTANCE
 				.createFileSystemView(SSHManager.session));
 		return sftp;
 	}

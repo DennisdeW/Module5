@@ -2,6 +2,7 @@ package files;
 
 import files.FolderMonitor.Event;
 import global.Logger;
+import global.PiCloudConstants;
 
 import java.io.File;
 import java.nio.file.StandardWatchEventKinds;
@@ -27,12 +28,18 @@ public class FileSystemManager implements Observer, Runnable {
 		Logger.log("Starting FileSystemManager...");
 		INSTANCE = new FileSystemManager();
 		THREAD = new Thread(INSTANCE);
+		THREAD.setName("FileSystemManager");
 		FolderMonitor.MONITORS.forEach(m -> m.addObserver(INSTANCE));
 		THREAD.start();
 	}
 
 	private BlockingQueue<FolderMonitor> updatedMonitors;
 	private volatile Set<FileMessage> encryptedMessages, decryptedMessages;
+
+	public static void register(String user) {
+		FolderMonitor.registerNewDirectory(user);
+		FolderMonitor.MONITORS.forEach(m -> m.addObserver(INSTANCE));
+	}
 
 	public static void stop() {
 		INSTANCE.stop = true;
@@ -112,13 +119,18 @@ public class FileSystemManager implements Observer, Runnable {
 					Logger.log(file.getAbsolutePath() + " created.");
 					if (wasExpected(file)) {
 						// Do nothing: we don't want cycles.
+					} else if (file.length() > PiCloudConstants.MAX_FILE_SIZE) {
+						Logger.logError("File " + file.getName()
+								+ " rejected! It's too large!");
+						file.delete();
 					} else {
 						// TODO: get this file over to the DE1
-						Logger.log("Sending " + file.getName() + " for encryption...") ;
+						Logger.log("Sending " + file.getName()
+								+ " for encryption...");
 					}
 				} else if (event.getType() == StandardWatchEventKinds.ENTRY_DELETE) {
 					Logger.log(file.getAbsolutePath() + " deleted.");
-					//TODO: Something?
+					// TODO: Something?
 				} else if (event.getType() == StandardWatchEventKinds.ENTRY_MODIFY) {
 					Logger.log(file.getAbsolutePath() + " modified.");
 				}

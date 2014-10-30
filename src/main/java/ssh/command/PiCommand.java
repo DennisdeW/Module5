@@ -74,7 +74,7 @@ public abstract class PiCommand implements Command {
 	 */
 	public enum PiCommandType {
 		TEST("test", TestCommand.class), GET_USER("user", GetUserCommand.class), CREATE_USER(
-				"create", CreateUserCommand.class), DUMMY("",
+				"create", CreateUserCommand.class), STOP("stop", StopCommand.class), DUMMY("",
 				DummyCommand.class);
 
 		private String command;
@@ -155,9 +155,9 @@ public abstract class PiCommand implements Command {
 		 * @return The command, supplied with the arguments.
 		 */
 		public static PiCommand getCommand(String command) {
-			System.out.println("PiCommand.PiCommandType.getCommand()");
 			Logger.log("Received Command: " + command + " (sender="
 					+ SSHManager.username + ")");
+			renameThread();
 			PiCommandType type = null;
 			try {
 				type = typeOf(command.split("-")[0]);
@@ -183,6 +183,14 @@ public abstract class PiCommand implements Command {
 				throw new IllegalArgumentException("Command \"" + command
 						+ "\" is not implemented!");
 			return type._getCommand(command, in, out, err, exit);
+		}
+		
+		private static void renameThread() {
+			String cur = Thread.currentThread().getName();
+			if (cur.contains("sshd")) {
+				char lastchar = cur.charAt(cur.length() - 1);
+				Thread.currentThread().setName("SSH Command " + lastchar);
+			}
 		}
 	}
 }

@@ -16,8 +16,10 @@ import org.apache.sshd.server.command.ScpCommandFactory;
 import org.apache.sshd.server.keyprovider.SimpleGeneratorHostKeyProvider;
 import org.apache.sshd.server.sftp.SftpSubsystem;
 
+import soc.controller.SocManager;
 import ssh.command.PiCommandFactory;
 import ssh.sftp.PiFileSystemFactory;
+
 
 /*
  import org.apache.sshd.server.shell.InvertedShell;
@@ -32,6 +34,8 @@ import ssh.sftp.PiFileSystemFactory;
  import java.io.FilterOutputStream;
  */
 import com.sun.jna.Platform;
+
+import db.DatabaseManager;
 
 /**
  * Controller for the SSH/SFTP server
@@ -63,6 +67,12 @@ public class SSHManager {
 	public static Session session = null;
 
 	static {
+		Thread.currentThread().setName("StartupThread");
+		Logger.init();
+		FileSystemManager.init();
+		DatabaseManager.init();
+		if (Platform.isLinux())
+			SocManager.init();
 		SSH = SshServer.setUpDefaultServer();
 		SSH.setPort(20022);
 		SSH.setPasswordAuthenticator(new Authenticator());
@@ -70,7 +80,7 @@ public class SSHManager {
 		// Probably has to change
 		SSH.setHost("localhost");
 		SSH.setKeyPairProvider(new SimpleGeneratorHostKeyProvider("hostkey.ser"));
-		SSH.setFileSystemFactory(new PiFileSystemFactory());
+		SSH.setFileSystemFactory(PiFileSystemFactory.INSTANCE);
 
 		// Add the SFTP subsystem
 		List<NamedFactory<Command>> subSystemList = new ArrayList<>();
@@ -96,6 +106,8 @@ public class SSHManager {
 	 * Stop the server
 	 */
 	public static void stop() {
+		Logger.log("Stop command received; stopping...");
+		FileSystemManager.stop();
 		Logger.log("Stopping SSH server.");
 		try {
 			SSH.stop();
@@ -104,23 +116,17 @@ public class SSHManager {
 			e.printStackTrace();
 		}
 		Logger.log("SSH stopped.");
+		Logger.log("Leftover threads: " + Thread.activeCount());
 	}
 
 	public static void main(String[] args) throws IOException {
-		Logger.init();
-		FileSystemManager.init();
 		// Runtime.getRuntime().exec("C:\\Users\\Dennis\\Desktop\\putty.exe");
 		start();
-		try {
-			Thread.sleep(180000);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
-		stop();
 	}
 
 	/**
 	 * Get a platform-specific command to open a shell. Not used.
+	 * 
 	 * @return
 	 */
 	@SuppressWarnings("unused")

@@ -92,6 +92,10 @@ public class DatabaseManager {
 		System.gc();
 	}
 
+	public static void init() {
+		Logger.log("Starting DatabaseManager...");
+	}
+	
 	/**
 	 * Closes the provided PreparedStatement.<br>
 	 * Usage of this method is very risky, since any active ResultSets will
@@ -111,6 +115,7 @@ public class DatabaseManager {
 
 	public static void main(String[] args) throws SQLException, IOException {
 		Logger.init();
+		init();
 		byte[] buf = new byte[65536];
 		PasswordGetter.INSTANCE.getKey(buf);
 		File file = new File("key.bin");
@@ -162,6 +167,7 @@ public class DatabaseManager {
 	 */
 	private static final class CleanupThread extends Thread {
 		public void run() {
+			setName("DB Cleanup");
 			Logger.log("Running Cleanup...");
 			try {
 				for (ResultSet rs : activeResults.keySet())
