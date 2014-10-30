@@ -50,8 +50,7 @@ public class Tools {
 	public static void waitForNs(long sleepTime) {
 		long currTime = System.nanoTime();
 		while (System.nanoTime() - currTime <= sleepTime);
-	}
-	
+	}	
 	
 	/**
 	 * Generates a secure random array of bytes.

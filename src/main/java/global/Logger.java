@@ -6,6 +6,8 @@ import java.io.IOException;
 
 public final class Logger implements Thread.UncaughtExceptionHandler {
 
+	private static final String NEW_LINE;
+
 	@SuppressWarnings("unused")
 	private static final File LOG;
 	private static final FileWriter WRITER;
@@ -23,6 +25,7 @@ public final class Logger implements Thread.UncaughtExceptionHandler {
 			e.printStackTrace();
 			System.exit(1);
 		}
+		NEW_LINE = System.lineSeparator();
 		LOG = l;
 		WRITER = fw;
 		START_TIMESTAMP = System.currentTimeMillis();
@@ -36,7 +39,7 @@ public final class Logger implements Thread.UncaughtExceptionHandler {
 	}
 
 	public static synchronized void log(String message) {
-		String log = "[+" + currentTime() + "] " + message + "\n";
+		String log = "[+" + currentTime() + "] " + message + NEW_LINE;
 		try {
 			WRITER.write(log);
 			WRITER.flush();
@@ -46,7 +49,8 @@ public final class Logger implements Thread.UncaughtExceptionHandler {
 	}
 
 	public static synchronized void logError(String message) {
-		String log = "\n>>>[+" + currentTime() + "] ERROR:" + message + "<<<\n";
+		String log = NEW_LINE + ">>>[+" + currentTime() + "] ERROR:" + 
+					message + "<<<" + NEW_LINE;
 		try {
 			WRITER.write(log);
 			WRITER.flush();

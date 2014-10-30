@@ -4,31 +4,15 @@ import global.Logger;
 import global.Timer;
 import global.Tools;
 
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.io.OutputStream;
-import java.io.Writer;
-import java.lang.reflect.Field;
 import java.util.Arrays;
-import java.util.Scanner;
 import java.util.concurrent.locks.ReentrantLock;
-
 import soc.model.GPIOSettings;
 import soc.model.Message;
 
 import com.pi4j.io.gpio.GpioController;
 import com.pi4j.io.gpio.GpioFactory;
 import com.pi4j.io.gpio.GpioPinDigitalInput;
-import com.pi4j.io.gpio.GpioPinDigitalOutput;
-import com.pi4j.io.gpio.Pin;
-import com.pi4j.io.gpio.PinMode;
-import com.pi4j.io.gpio.PinPullResistance;
-import com.pi4j.io.gpio.PinState;
-import com.pi4j.io.gpio.RaspiPin;
 import com.pi4j.wiringpi.Spi;
 
 /**
@@ -126,14 +110,13 @@ public class SocManager {
 			return null;
 		}
 		boolean fail = false;
-		int maxBuff = Message.PACKET_SIZE;
+		int maxBuff = msg.getPacketSize();
 		// wait till DE1 is not sending
 		waitForPin(settings.getDe1ActivePin(GPIO), false, timeout);
 		// set encryption/decryption command pin		
 		settings.getCommandPin(GPIO).setState(!encrypt);
 		// tell the DE1 the Pi is going to send
 		settings.getPiActivePin(GPIO).high();
-		Runtime rt = Runtime.getRuntime();
 		// send data to DE1 for encryption/decryption and receive data		
 		int readIndex = 0;
 		byte[] buffer = new byte[maxBuff];
@@ -142,6 +125,11 @@ public class SocManager {
 		Arrays.fill(allZeros, (byte)0);
 		Timer timer = new Timer(timeout, true);
 		for (int i = 0; i < receivedBytes.length; i += maxBuff) {
+			System.out.println("MSG: " + Arrays.toString(msg.getData()));
+			System.out.println("Buffer: " + Arrays.toString(buffer));
+			System.out.println("Max buffer: " + maxBuff);
+			System.out.println("i: " + i);
+			System.out.println("MSG len: " + receivedBytes.length);
 			System.arraycopy(msg.getData(), i, buffer, 0, maxBuff);
 			// try to send data
 			boolean sendSuccesfull = true;
@@ -187,15 +175,12 @@ public class SocManager {
 			}
 		}	
 		// tell the DE1 the Pi is done sending
-		System.out.println("Set pi active pin to 0");
 		settings.getPiActivePin(GPIO).low();
-        System.out.println("Done.");
         releaseLock();
         if (fail) {
         	return null;
         } else {
-    		System.out.println("Message " + (encrypt ? "encryption " : "decryption ") + "done");
-        	return new Message(receivedBytes, msg.getActualSize(), encrypt);
+        	return new Message(receivedBytes, msg.getActualSize(), encrypt, msg.getPacketSize());
         }
 	}	
 	
@@ -256,36 +241,13 @@ public class SocManager {
 	
 	// for testing only
 	public static void main(String[] args) {
-		SocManager gpio = new SocManager(new GPIOSettings(), Integer.parseInt(args[0]), 1000);
-		//byte[] data = new byte[]{0,1,2,3,4,5,6,7,8,9};
-		File f = new File("bigfile.txt");	
-		System.out.println("Loading input file: " + f.getName());
-		if (!f.exists()) {
-			System.err.println("No input file available");
-		}
-		String newLine = System.lineSeparator();
-		StringBuilder sb = new StringBuilder();
-		try (Scanner scanner = new Scanner(f)) {
-			while (scanner.hasNextLine()) {
-				sb.append(scanner.nextLine());
-				sb.append(newLine);
-			}
-		} catch (IOException e) {
-			System.err.println("IOException on reading input file");			
-		}
-		Message msg = new Message(sb.toString().getBytes(), false);
-		System.out.println("Done.");
-		Timer timer = new Timer(100000, true);
-		Message response = gpio.sendAndReceiveData(msg, true, 250);
-		System.out.println("---- Took: " + (100000 - timer.timeLeft()) + " ms");
-		try (FileOutputStream fos = new FileOutputStream(new File("bigfile_copy.txt"))) {
-			fos.write(response.getData(), 0, response.getData().length);
-			fos.flush();
-			fos.close();
-		} catch (IOException e) {
-			System.err.println("IOException on writing output file");			
-		}				
-		gpio.shutdown();
+		int sendSpeed = args.length > 0 ? Integer.parseInt(args[0]) : 32000000;
+		int packetSize = args.length > 1 ? Integer.parseInt(args[1]) : 16;
+		int fileSize = args.length > 2 ? Integer.parseInt(args[2]) : 1000;
+		int bufferSize = args.length > 3 ? Integer.parseInt(args[3]) : 1000;
+		int timeOut = args.length > 4 ? Integer.parseInt(args[4]) : 1000;
+		boolean selfTest = args.length > 5 ? Boolean.parseBoolean(args[5]) : true;
+		SocManagerTest.testSocManager(sendSpeed, packetSize, fileSize, bufferSize, timeOut, selfTest);
 	}
 
 }
