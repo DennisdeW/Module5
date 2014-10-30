@@ -117,70 +117,91 @@ public class SocManager {
 		settings.getCommandPin(GPIO).setState(!encrypt);
 		// tell the DE1 the Pi is going to send
 		settings.getPiActivePin(GPIO).high();
-		// send data to DE1 for encryption/decryption and receive data		
+		// send data to DE1 for encryption/decryption and receive data	
+		System.out.println("Sending MSG: " + Arrays.toString(msg.getData()));
+		System.out.println("MSG len: " + msg.getData().length);
+		System.out.println("Max buffer: " + maxBuff);
+		System.out.println("");
 		int readIndex = 0;
 		byte[] buffer = new byte[maxBuff];
 		byte[] allZeros = new byte[maxBuff];
 		byte[] receivedBytes = new byte[msg.getData().length];
 		Arrays.fill(allZeros, (byte)0);
 		Timer timer = new Timer(timeout, true);
-		for (int i = 0; i < receivedBytes.length; i += maxBuff) {
-			System.out.println("MSG: " + Arrays.toString(msg.getData()));
-			System.out.println("Buffer: " + Arrays.toString(buffer));
-			System.out.println("Max buffer: " + maxBuff);
-			System.out.println("i: " + i);
-			System.out.println("MSG len: " + receivedBytes.length);
-			System.arraycopy(msg.getData(), i, buffer, 0, maxBuff);
+		for (int i = 0; i < msg.getData().length; i += maxBuff) {
+			try {
+				System.arraycopy(msg.getData(), i, buffer, 0, maxBuff);
+			} catch (ArrayIndexOutOfBoundsException e) {				
+				Logger.logError(e);
+			}
+			System.out.println("Send data (" + i + " to " + (i + maxBuff) + "): " + Arrays.toString(buffer));
 			// try to send data
 			boolean sendSuccesfull = true;
 			if (Spi.wiringPiSPIDataRW(0, buffer, maxBuff) == -1) {
+				System.out.println(true);
 				Logger.logError("Could not send data to DE1: " + Arrays.toString(buffer));
 				i -= maxBuff;
 				sendSuccesfull = false;
 			}
 			if (sendSuccesfull) {
-				timer.restart();
+				System.out.println("success 1");
 				// check for response from DE1
 				if (!Tools.allEqualTo(buffer, (byte)0) && (selfSending || settings.getDe1ActivePin(GPIO).isHigh())) {
+					System.out.println("Got data (" + readIndex + " to " + (readIndex + maxBuff) + "): " + Arrays.toString(buffer));
 					System.arraycopy(buffer, 0, receivedBytes, i, maxBuff);
 					readIndex += maxBuff;
+					timer.restart();
 				}
 			}
 			// check for time-out
 			if (timer.hasExpired()) {
-				Logger.logError("Timed out" + Arrays.toString(buffer));	
+				System.out.println("Expired 1");
+				Logger.logError("Timed out: " + timer.toString() + Arrays.toString(buffer));
 				// tell the DE1 the Pi is done sending
 				settings.getPiActivePin(GPIO).low();
 		        releaseLock();
 		        return null;
 			}
 		}	
+		// tell the DE1 the Pi is done sending
+		settings.getPiActivePin(GPIO).low();
 		// receive pending packages from DE1
 		timer.restart();
 		for (; readIndex < msg.getData().length;) {	
-			System.arraycopy(allZeros, 0, buffer, 0, maxBuff);
+			try {
+				System.arraycopy(allZeros, 0, buffer, 0, maxBuff);
+			} catch (ArrayIndexOutOfBoundsException e) {				
+				Logger.logError(e);
+			}
 			Spi.wiringPiSPIDataRW(0, buffer, maxBuff);
 			// check for response from DE1
 			if (!Tools.allEqualTo(buffer, (byte)0) && (selfSending || settings.getDe1ActivePin(GPIO).isHigh())) {
+				System.out.println("success 2");
+				System.out.println("Got data late (" + readIndex + " to " + (readIndex + maxBuff) + "): " + Arrays.toString(buffer));
 				System.arraycopy(buffer, 0, receivedBytes, readIndex, maxBuff);
 				readIndex += maxBuff;
+				timer.restart();
 			} else if (settings.getDe1ActivePin(GPIO).isLow()) {
+				System.out.println("low 1");
 				Logger.logError("Did not get whole message from DE1.");
 		        fail = true;
 		        break;
 			} else if (timer.hasExpired()) {
-				Logger.logError("Timed out" + Arrays.toString(buffer));	
+				System.out.println("Expired 2");
+				Logger.logError("Timed out: " + timer.toString() + Arrays.toString(buffer));	
 		        fail = true;
 		        break;
 			}
 		}	
-		// tell the DE1 the Pi is done sending
-		settings.getPiActivePin(GPIO).low();
         releaseLock();
         if (fail) {
+        	System.out.println("Fail");
         	return null;
         } else {
-        	return new Message(receivedBytes, msg.getActualSize(), encrypt, msg.getPacketSize());
+        	Message rec = new Message(receivedBytes, msg.getActualSize(), encrypt, msg.getPacketSize());
+        	System.out.println("Received MSG: " + Arrays.toString(rec.getData()));
+        	System.out.println("-----------------------");
+        	return rec;
         }
 	}	
 	

@@ -41,7 +41,8 @@ public class Message {
 		this.encrypted = encrypted;
 		this.packetSize = packetSize;
 		int missingBytes;
-		if ((missingBytes = (packetSize - (data.length % packetSize))) != 0) {
+		if ((data.length % packetSize) != 0) {
+			missingBytes = (packetSize - (data.length % packetSize));
 			if (data.length != actualSize) {
 				byte[] tempData = data;
 				data = new byte[actualSize];

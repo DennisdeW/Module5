@@ -98,7 +98,7 @@ public class Timer {
 	 * @return whether the timer has expired
 	 */
 	public boolean hasExpired() {
-		return timeLeft() <= 0;
+		return !started || timeLeft() <= 0;
 	}
 	
 	/**
@@ -129,5 +129,16 @@ public class Timer {
 	 */
 	public void stop() {
 		started = false;
+	}
+	
+	@Override
+	public String toString() {
+		StringBuilder sb = new StringBuilder("Timer - rel expire time:");
+		sb.append(relExpireTime);
+		sb.append(", start time:");
+		sb.append(startTime);
+		sb.append(", started:");
+		sb.append(started);
+		return sb.toString();
 	}
 }
