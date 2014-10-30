@@ -189,7 +189,7 @@ public abstract class PiCommand implements Command {
 			String cur = Thread.currentThread().getName();
 			if (cur.contains("sshd")) {
 				char lastchar = cur.charAt(cur.length() - 1);
-				Thread.currentThread().setName("SSH Session " + lastchar);
+				Thread.currentThread().setName("SSH Command " + lastchar);
 			}
 		}
 	}
