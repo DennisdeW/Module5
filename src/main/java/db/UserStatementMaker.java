@@ -4,6 +4,8 @@ import java.security.SecureRandom;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 import org.bouncycastle.crypto.digests.SHA3Digest;
@@ -190,6 +192,18 @@ public class UserStatementMaker {
 		}
 	}
 
+	public static List<String> getUserNameList() throws SQLException {
+		PreparedStatement statement = DatabaseManager.prepare("SELECT \"name\" FROM \"Users\";");
+		ResultSet result = statement.executeQuery();
+		DatabaseManager.registerResult(result, statement);
+		Tuple[] tuples = Tuple.fromResultSet(result);
+		List<String> names = new ArrayList<>();
+		for (Tuple t : tuples) {
+			names.add((String) t.getItem(0));
+		}
+		return names;
+	}
+	
 	private static final int getNextId() throws SQLException {
 		PreparedStatement statement = DatabaseManager
 				.prepare("SELECT MAX(\"id\") FROM \"Users\";");
