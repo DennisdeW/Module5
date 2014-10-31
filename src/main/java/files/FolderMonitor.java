@@ -5,6 +5,7 @@ import static java.nio.file.StandardWatchEventKinds.ENTRY_DELETE;
 import static java.nio.file.StandardWatchEventKinds.ENTRY_MODIFY;
 import static java.nio.file.StandardWatchEventKinds.OVERFLOW;
 import global.Logger;
+import global.PiCloudConstants;
 
 import java.io.File;
 import java.io.IOException;
@@ -44,63 +45,17 @@ public class FolderMonitor extends Observable implements Runnable {
 		initialiseMonitors();
 	}
 
-	/**
-	 * This should be called when the program starts to put monitors on all
-	 * existing users' directories.
-	 */
-	public static void initialiseMonitors() {
-		Logger.log("Starting Monitors...");
-		PiFileSystemFactory.init();
-		try {
-			List<String> names = UserStatementMaker.getUserNameList();
-			names.forEach(n -> {
-				FolderMonitor mon = new FolderMonitor(n);
-				MONITORS.add(mon);
-				Thread t = new Thread(mon);
-				t.setName("FolderMonitor-" + n);
-				THREADS.add(t);
-				t.start();
-			});
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
-	}
-
-	/**
-	 * This should be called when a new user is added.
-	 */
-	public static void registerNewDirectory(String user) {
-		FolderMonitor mon = new FolderMonitor(user);
-		Thread t = new Thread(mon);
-		MONITORS.add(mon);
-		THREADS.add(t);
-		t.start();
-	}
-
-	/**
-	 * Stops all monitor threads.
-	 */
-	public static void stopMonitors() {
-		MONITORS.forEach(m -> m.stop());
-		MONITORS.clear();
-		THREADS.forEach(t -> {
-			try {
-				t.join();
-			} catch (Exception e) {
-			}
-		});
-	}
-
 	private WatchService service;
 	private Queue<Event> events;
 	private Path basePath;
 	private boolean stop = false;
 
 	/**
-	 * You should create these using the static methods above.
+	 * You should create these using the static methods.
 	 */
 	private FolderMonitor(String user) {
 		events = new ArrayDeque<>();
+		new ArrayDeque<>();
 		try {
 			basePath = new File(PiFileSystemFactory.homeDirs.get(user))
 					.toPath();
@@ -149,13 +104,29 @@ public class FolderMonitor extends Observable implements Runnable {
 					// Overflow means that an event was missed.
 					if (type == OVERFLOW) {
 						Logger.logError("An overflow occured in one of the FolderMonitors!");
+						key.reset();
 						continue;
 					}
-					File file = ((Path) ev.context()).toAbsolutePath().toFile();
-					offer(new Event(type, file));
-					setChanged();
-					notifyObservers();
+					Path path = (Path) ev.context();
+					File file = new File(basePath.toString() + "/" + path.getFileName().toString());
+					String[] parts = file.getName().split("\\.");
+					String ext = parts[parts.length - 1];
+					if (!ext.equals("inc")) {
+						if (ext.equals("dec")) {
+							if (type == ENTRY_CREATE) {
+								//DecryptCommand#decrypt() creates these now.
+								/*file = new TemporaryFile(
+										file.getAbsolutePath(),
+										PiCloudConstants.TEMP_FILE_DURATION);*/
+							}
+						} else {
+							offer(new Event(type, file));
+							setChanged();
+							notifyObservers();
+						}
+					}
 				}
+				key.reset();
 			} catch (InterruptedException | ClosedWatchServiceException e) {
 				Logger.logError(e);
 				continue;
@@ -165,6 +136,53 @@ public class FolderMonitor extends Observable implements Runnable {
 
 	private void stop() {
 		stop = true;
+	}
+
+	/**
+	 * This should be called when the program starts to put monitors on all
+	 * existing users' directories.
+	 */
+	public static void initialiseMonitors() {
+		Logger.log("Starting Monitors...");
+		PiFileSystemFactory.init();
+		try {
+			List<String> names = UserStatementMaker.getUserNameList();
+			names.forEach(n -> {
+				FolderMonitor mon = new FolderMonitor(n);
+				MONITORS.add(mon);
+				Thread t = new Thread(mon);
+				t.setName("FolderMonitor-" + n);
+				THREADS.add(t);
+				t.start();
+			});
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+
+	/**
+	 * This should be called when a new user is added.
+	 */
+	public static void registerNewDirectory(String user) {
+		FolderMonitor mon = new FolderMonitor(user);
+		Thread t = new Thread(mon);
+		MONITORS.add(mon);
+		THREADS.add(t);
+		t.start();
+	}
+
+	/**
+	 * Stops all monitor threads.
+	 */
+	public static void stopMonitors() {
+		MONITORS.forEach(m -> m.stop());
+		MONITORS.clear();
+		THREADS.forEach(t -> {
+			try {
+				t.join();
+			} catch (Exception e) {
+			}
+		});
 	}
 
 	/**

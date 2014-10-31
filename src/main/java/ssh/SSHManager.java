@@ -9,8 +9,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.sshd.SshServer;
+import org.apache.sshd.common.ForwardingFilter;
 import org.apache.sshd.common.NamedFactory;
 import org.apache.sshd.common.Session;
+import org.apache.sshd.common.forward.DefaultTcpipForwarderFactory;
 import org.apache.sshd.server.Command;
 import org.apache.sshd.server.command.ScpCommandFactory;
 import org.apache.sshd.server.keyprovider.SimpleGeneratorHostKeyProvider;
@@ -19,6 +21,8 @@ import org.apache.sshd.server.sftp.SftpSubsystem;
 import soc.controller.SocManager;
 import ssh.command.PiCommandFactory;
 import ssh.sftp.PiFileSystemFactory;
+
+
 
 
 /*
@@ -81,6 +85,7 @@ public class SSHManager {
 		SSH.setHost("localhost");
 		SSH.setKeyPairProvider(new SimpleGeneratorHostKeyProvider("hostkey.ser"));
 		SSH.setFileSystemFactory(PiFileSystemFactory.INSTANCE);
+		SSH.setTcpipForwarderFactory(new DefaultTcpipForwarderFactory());
 
 		// Add the SFTP subsystem
 		List<NamedFactory<Command>> subSystemList = new ArrayList<>();

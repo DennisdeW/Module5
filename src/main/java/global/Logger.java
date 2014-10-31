@@ -39,6 +39,7 @@ public final class Logger implements Thread.UncaughtExceptionHandler {
 
 	public static synchronized void log(String message) {
 		String log = getPrefix() + message + NEW_LINE;
+		System.out.print(log);
 		try {
 			WRITER.write(log);
 			WRITER.flush();
@@ -49,7 +50,8 @@ public final class Logger implements Thread.UncaughtExceptionHandler {
 
 	public static synchronized void logError(String message) {
 		String log = NEW_LINE + ">>>" + getPrefix() + " ERROR:" + message
-				+ "<<<" + NEW_LINE;
+				+ "<<<" + NEW_LINE + NEW_LINE;
+		System.err.print(log);
 		try {
 			WRITER.write(log);
 			WRITER.flush();
