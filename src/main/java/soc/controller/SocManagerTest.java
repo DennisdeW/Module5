@@ -41,13 +41,13 @@ public class SocManagerTest {
 		int assumedTime = sendSpeed / 8 / fileSize * 1000 * 2; //ms
 		Timer timer = new Timer(assumedTime, true);
 		Message encrypted = manager.sendAndReceiveData(msg, true, timeOut, selfTest);
-		Assert.assertNotNull("Encryption response from DE1 timed out (>" + timeOut + "ms)", 
+		Assert.assertNotNull("Encryption response from DE1 timed out (>" + timeOut + "ms) or de1 send pin is low", 
 				encrypted);
 		Assert.assertFalse("Encryption not done in assumed time (>" + assumedTime + "ms)", 
 				timer.hasExpired());
 		timer.restart();
 		Message decrypted = manager.sendAndReceiveData(encrypted, false, timeOut, selfTest);
-		Assert.assertNotNull("Decryption response from DE1 timed out (>" + timeOut + "ms)",
+		Assert.assertNotNull("Decryption response from DE1 timed out (>" + timeOut + "ms) or de1 send pin is low",
 				encrypted);
 		Assert.assertFalse("Decryption not done in assumed time (>" + assumedTime + "ms)", 
 				timer.hasExpired());
