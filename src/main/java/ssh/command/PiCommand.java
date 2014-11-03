@@ -12,6 +12,7 @@ import org.apache.sshd.server.Command;
 import org.apache.sshd.server.ExitCallback;
 
 import ssh.SSHManager;
+import ssh.command.sftp.SFTPCommand;
 
 /**
  * Base class for commands.
@@ -82,8 +83,8 @@ public abstract class PiCommand implements Command {
 	public enum PiCommandType {
 		TEST("test", TestCommand.class), GET_USER("user", GetUserCommand.class), CREATE_USER(
 				"create", CreateUserCommand.class), STOP("stop",
-				StopCommand.class), DECRYPT("decrypt", DecryptCommand.class), DUMMY(
-				"", DummyCommand.class);
+				StopCommand.class), DECRYPT("decrypt", DecryptCommand.class), SFTP(
+				"sftp", SFTPCommand.class), DUMMY("", DummyCommand.class);
 
 		private String command;
 		private Class<? extends PiCommand> clazz;
@@ -100,7 +101,6 @@ public abstract class PiCommand implements Command {
 		}
 
 		private PiCommand _getCommand(String args) {
-			System.out.println("PiCommand.PiCommandType.getCommand()");
 			PiCommand comm = null;
 			try {
 				comm = clazz.getConstructor(List.class).newInstance(
@@ -116,7 +116,6 @@ public abstract class PiCommand implements Command {
 
 		private PiCommand _getCommand(String args, InputStream in,
 				OutputStream out, OutputStream err, ExitCallback exit) {
-			System.out.println("PiCommand.PiCommandType.getCommand()");
 			PiCommand comm = null;
 			try {
 				comm = clazz.getConstructor(List.class, InputStream.class,
@@ -159,13 +158,13 @@ public abstract class PiCommand implements Command {
 		 * @return The command, supplied with the arguments.
 		 */
 		public static PiCommand getCommand(String command) {
+			renameThread();
 			if (command.startsWith("create"))
 				Logger.log("Received Create User Command: "
 						+ command.split("-")[1]);
 			else
 				Logger.log("Received Command: " + command + " (sender="
 						+ SSHManager.username + ")");
-			renameThread();
 			PiCommandType type = null;
 			try {
 				type = typeOf(command.split("-")[0]);
@@ -180,6 +179,13 @@ public abstract class PiCommand implements Command {
 
 		public static PiCommand getCommand(String command, InputStream in,
 				OutputStream out, OutputStream err, ExitCallback exit) {
+			renameThread();
+			if (command.startsWith("create"))
+				Logger.log("Received Create User Command: "
+						+ command.split("-")[1]);
+			else
+				Logger.log("Received Command: " + command + " (sender="
+						+ SSHManager.username + ")");
 			PiCommandType type = null;
 			try {
 				type = typeOf(command.split("-")[0]);

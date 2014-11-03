@@ -81,8 +81,7 @@ public class SSHManager {
 		SSH.setPort(20022);
 		SSH.setPasswordAuthenticator(new Authenticator());
 		SSH.setCommandFactory(new ScpCommandFactory(new PiCommandFactory()));
-		// Probably has to change
-		SSH.setHost("localhost");
+		SSH.setHost("0.0.0.0");
 		SSH.setKeyPairProvider(new SimpleGeneratorHostKeyProvider("hostkey.ser"));
 		SSH.setFileSystemFactory(PiFileSystemFactory.INSTANCE);
 		SSH.setTcpipForwarderFactory(new DefaultTcpipForwarderFactory());
