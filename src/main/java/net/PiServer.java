@@ -2,10 +2,18 @@ package net;
 
 import global.Logger;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.InetAddress;
 import java.net.SocketException;
 import java.net.SocketTimeoutException;
+import java.security.GeneralSecurityException;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.CertificateException;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -13,27 +21,30 @@ import javax.net.ssl.SSLServerSocket;
 import javax.net.ssl.SSLServerSocketFactory;
 import javax.net.ssl.SSLSocket;
 
+import org.apache.commons.ssl.SSLServer;
+
 public class PiServer extends Thread {
 	public static final SSLServerSocket SOCKET;
+	private static PiServer instance;
 
 	private final Set<PiSession> activeSessions;
 
 	private boolean stop;
 
 	static {
+		System.setProperty("javax.net.ssl.keyStore", "keystore");
+		System.setProperty("javax.net.ssl.keyStorePassword", "picloudkeypass");
 		SSLServerSocket t = null;
 		Logger.log("Starting server on port 20022");
 		try {
-			SSLServerSocketFactory factory = (SSLServerSocketFactory) SSLServerSocketFactory
+			SSLServerSocketFactory ssl = (SSLServerSocketFactory) SSLServerSocketFactory
 					.getDefault();
-			t = (SSLServerSocket) factory.createServerSocket(20022, 0,
-					InetAddress.getLocalHost());
+			t = (SSLServerSocket) ssl.createServerSocket(20022);
 		} catch (IOException e) {
 			Logger.logError("Could not create Server Socket!\n" + e);
 			System.exit(1);
 		}
 		SOCKET = t;
-		SOCKET.setWantClientAuth(true);
 		try {
 			SOCKET.setSoTimeout(1000);
 		} catch (SocketException e) {
@@ -54,18 +65,20 @@ public class PiServer extends Thread {
 			} catch (IOException e) {
 				Logger.logError("Exception accepting connection: " + e);
 			}
-			Logger.log("New client accepted: " + client.getInetAddress());
-			PiSession session = new PiSession(this, client);
-			activeSessions.add(session);
-			session.start();
+			if (client != null) {
+				Logger.log("New client accepted: " + client.getInetAddress());
+				PiSession session = new PiSession(this, client);
+				activeSessions.add(session);
+				session.start();
+			}
 		}
 		Logger.log("Server stopped.");
 	}
 
-	public void stopServer() {
+	public static void stopServer() {
 		Logger.log("Stopping Server.");
-		activeSessions.forEach(s -> s.stopSession());
-		stop = true;
+		instance.activeSessions.forEach(s -> s.stopSession());
+		instance.stop = true;
 		try {
 			SOCKET.close();
 		} catch (IOException e) {
@@ -83,7 +96,10 @@ public class PiServer extends Thread {
 		setName("PiServer");
 	}
 
-	public static void main(String[] args) {
-		new PiServer().start();
+	public static void main(String[] args) throws IOException {
+		// Security.addProvider(new BouncyCastleProvider());
+		// Certificate kp = getCertificate();
+		instance = new PiServer();
+		instance.start();
 	}
 }
