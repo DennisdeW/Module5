@@ -8,6 +8,8 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.List;
 
+import net.PiSession;
+
 import org.apache.sshd.server.Command;
 import org.apache.sshd.server.ExitCallback;
 
@@ -40,9 +42,8 @@ public abstract class PiCommand implements Command {
 		result = "";
 	}
 
-	protected boolean canRun() {
-		return !SSHManager.limitedUser
-				|| getType() == PiCommandType.CREATE_USER;
+	protected boolean canRun(String user) {
+		return PiSession.isLoggedIn(user) || getType() == PiCommandType.LOGIN;
 	}
 
 	public PiCommand(List<String> args, InputStream in, OutputStream out,
@@ -87,7 +88,10 @@ public abstract class PiCommand implements Command {
 		TEST("test", TestCommand.class), GET_USER("user", GetUserCommand.class), CREATE_USER(
 				"create", CreateUserCommand.class), STOP("stop",
 				StopCommand.class), DECRYPT("decrypt", DecryptCommand.class), SFTP(
-				"sftp", SFTPCommand.class), DUMMY("", DummyCommand.class);
+				"sftp", SFTPCommand.class), DUMMY("", DummyCommand.class), CHECK_USER(
+				"checkUser", CheckUserCommand.class), DELETE_USER("delete",
+				DeleteUserCommand.class), LOGIN("login", LoginCommand.class), LOGOUT(
+				"logout", LogoutCommand.class);
 
 		private String command;
 		private Class<? extends PiCommand> clazz;
@@ -166,8 +170,12 @@ public abstract class PiCommand implements Command {
 				Logger.log("Received Create User Command: "
 						+ command.split("-")[1]);
 			else
-				Logger.log("Received Command: " + command + " (sender="
-						+ SSHManager.username + ")");
+				Logger.log("Received Command: " + command + " (sender=" + /*
+																		 * SSHManager
+																		 * .
+																		 * username
+																		 * +
+																		 */")");
 			PiCommandType type = null;
 			try {
 				type = typeOf(command.split("-")[0]);
@@ -188,7 +196,7 @@ public abstract class PiCommand implements Command {
 						+ command.split("-")[1]);
 			else
 				Logger.log("Received Command: " + command + " (sender="
-						+ SSHManager.username + ")");
+				/* + SSHManager.username */+ ")");
 			PiCommandType type = null;
 			try {
 				type = typeOf(command.split("-")[0]);

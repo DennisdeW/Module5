@@ -32,8 +32,6 @@ public class GetUserCommand extends PiCommand {
 
 	@Override
 	public void start(Environment env) throws IOException {
-		if (!canRun())
-			return;
 		try {
 			env.getEnv().get(Environment.ENV_TERM);
 		} catch (Exception e) {

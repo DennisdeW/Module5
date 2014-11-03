@@ -35,6 +35,7 @@ public class DataPacket extends PiPacket {
 	
 	public File saveToFile(String path) throws IOException {
 		File file = new File(path);
+		file.createNewFile();
 		FileOutputStream fos = new FileOutputStream(file);
 		fos.write(this.file);
 		fos.close();

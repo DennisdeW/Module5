@@ -193,7 +193,8 @@ public class UserStatementMaker {
 	}
 
 	public static List<String> getUserNameList() throws SQLException {
-		PreparedStatement statement = DatabaseManager.prepare("SELECT \"name\" FROM \"Users\";");
+		PreparedStatement statement = DatabaseManager
+				.prepare("SELECT \"name\" FROM \"Users\";");
 		ResultSet result = statement.executeQuery();
 		DatabaseManager.registerResult(result, statement);
 		Tuple[] tuples = Tuple.fromResultSet(result);
@@ -203,7 +204,7 @@ public class UserStatementMaker {
 		}
 		return names;
 	}
-	
+
 	private static final int getNextId() throws SQLException {
 		PreparedStatement statement = DatabaseManager
 				.prepare("SELECT MAX(\"id\") FROM \"Users\";");
@@ -213,6 +214,16 @@ public class UserStatementMaker {
 		if (tuples.length > 0)
 			return (int) tuples[0].getItem(0) + 1;
 		throw new Error("User database is empty!");
+	}
+
+	public static boolean accountExists(String name) throws SQLException {
+		PreparedStatement statement = DatabaseManager
+				.prepare("SELECT * FROM \"Users\" WHERE name = ?");
+		statement.setString(1, name);
+		ResultSet result = statement.executeQuery();
+		DatabaseManager.registerResult(result, statement);
+		Tuple[] tuples = Tuple.fromResultSet(result);
+		return tuples.length > 0;
 	}
 
 	private static final byte[] hash(byte[] in) {

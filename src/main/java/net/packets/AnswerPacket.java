@@ -11,10 +11,10 @@ public class AnswerPacket extends PiPacket {
 	@Override
 	public byte[] toArray() {
 		byte[] header = getHeader(message.length());
-		byte[] packet = new byte[header.length + message.length()];
-		System.arraycopy(header, 0, packet, 0, header.length);
+		byte[] packet = new byte[6 + message.length()];
+		System.arraycopy(header, 0, packet, 0, 6);
 		byte[] command = getData();
-		System.arraycopy(command, 0, packet, header.length, command.length);
+		System.arraycopy(command, 0, packet, 6, command.length);
 		return packet;
 	}
 

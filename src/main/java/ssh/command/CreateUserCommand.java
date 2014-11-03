@@ -9,6 +9,8 @@ import java.io.OutputStream;
 import java.sql.SQLException;
 import java.util.List;
 
+import net.PiSession;
+
 import org.apache.sshd.server.Environment;
 import org.apache.sshd.server.ExitCallback;
 
@@ -43,15 +45,15 @@ public class CreateUserCommand extends PiCommand {
 	 * Runs the command.
 	 */
 	public void start(Environment env) throws IOException {
-		if (!canRun())
-			return;
 		try {
 			UserStatementMaker.createAccount(args[1], args[2].getBytes());
 			Logger.log("New user account created: " + args[1] + " -- id="
 					+ UserStatementMaker.getId(args[1]));
-			PiFileSystemFactory.register(args[1]);
+			/*PiFileSystemFactory.register(args[1]);
 			FileSystemManager.register(args[1]);
+			*/
 			result += "Account \"" + args[1] + "\" was created.";
+			PiSession.logIn(args[1]);
 		} catch (SQLException | UnknownUserException e) {
 			Logger.logError("Failed to create user: " + e);
 			result += "An error occurred. The account was not created.";

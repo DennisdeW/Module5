@@ -1,14 +1,10 @@
 package soc;
 
-import java.util.Arrays;
 
 import global.Timer;
 
 import org.junit.Assert;
 import org.junit.Test;
-
-import com.sun.jna.Platform;
-
 import soc.controller.SocManager;
 import soc.model.GPIOSettings;
 import soc.model.Message;
@@ -17,7 +13,7 @@ public class SocManagerTest {
 
 	@Test
 	public void testSocManager() {
-		if (!Platform.isLinux()) {
+		if (System.getProperty("os.name").contains("indows")) {
 			return;
 		}
 		// set up manager

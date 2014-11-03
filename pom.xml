@@ -50,11 +50,6 @@
 			<artifactId>slf4j-nop</artifactId>
 			<version>1.7.7</version>
 		</dependency>
-		<dependency>
-			<groupId>ca.juliusdavies</groupId>
-			<artifactId>not-yet-commons-ssl</artifactId>
-			<version>0.3.11</version>
-		</dependency>
 	</dependencies>
 	<build>
 		<plugins>

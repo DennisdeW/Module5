@@ -20,8 +20,8 @@ public class DefaultExitCallback implements ExitCallback {
 		if (PiCommand.terminateSession) {
 			Logger.log("Terminating Session");
 			try {
-				SSHManager.session.exceptionCaught(new SshException(
-						"not actually an exception"));
+				//SSHManager.session.exceptionCaught(new SshException(
+				//		"not actually an exception"));
 			} catch (Throwable t) {
 			}
 		} else

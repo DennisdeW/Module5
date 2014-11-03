@@ -3,13 +3,11 @@ package ssh;
 import files.FileSystemManager;
 import global.Logger;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.sshd.SshServer;
-import org.apache.sshd.common.ForwardingFilter;
 import org.apache.sshd.common.NamedFactory;
 import org.apache.sshd.common.Session;
 import org.apache.sshd.common.forward.DefaultTcpipForwarderFactory;
@@ -18,7 +16,6 @@ import org.apache.sshd.server.command.ScpCommandFactory;
 import org.apache.sshd.server.keyprovider.SimpleGeneratorHostKeyProvider;
 import org.apache.sshd.server.sftp.SftpSubsystem;
 
-import soc.controller.SocManager;
 import ssh.command.PiCommandFactory;
 import ssh.sftp.PiFileSystemFactory;
 
@@ -37,7 +34,6 @@ import ssh.sftp.PiFileSystemFactory;
  import java.io.FilterInputStream;
  import java.io.FilterOutputStream;
  */
-import com.sun.jna.Platform;
 
 import db.DatabaseManager;
 
@@ -75,8 +71,6 @@ public class SSHManager {
 		Logger.init();
 		FileSystemManager.init();
 		DatabaseManager.init();
-		if (Platform.isLinux())
-			SocManager.init();
 		SSH = SshServer.setUpDefaultServer();
 		SSH.setPort(20022);
 		SSH.setPasswordAuthenticator(new Authenticator());
@@ -128,17 +122,4 @@ public class SSHManager {
 		start();
 	}
 
-	/**
-	 * Get a platform-specific command to open a shell. Not used.
-	 * 
-	 * @return
-	 */
-	@SuppressWarnings("unused")
-	private static String[] getShellString() {
-		if (Platform.isWindows())
-			return new String[] { "C:\\Windows\\SysWOW64\\cmd",
-					"/K cd " + new File("").getAbsolutePath() + "\\sandbox" };
-		else
-			return new String[] { "/bin/sh" };
-	}
 }

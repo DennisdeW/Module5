@@ -13,7 +13,6 @@ import javax.net.ssl.SSLSocketFactory;
 
 import net.packets.AnswerPacket;
 
-import org.apache.commons.ssl.SSLClient;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;

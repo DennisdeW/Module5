@@ -7,6 +7,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.List;
 
+import net.PiServer;
+
 import org.apache.sshd.server.Environment;
 import org.apache.sshd.server.ExitCallback;
 
@@ -30,10 +32,10 @@ public class StopCommand extends PiCommand {
 
 	@Override
 	public void start(Environment env) throws IOException {
-		if (!canRun())
+		if (!canRun(args[1]))
 			return;
-		if (args[1].equals("reallyactuallystop"))
-			SSHManager.stop();
+		if (args[2].equals("reallyactuallystop"))
+			PiServer.stopServer();
 		else
 			Logger.log("STOP received with wrong password.");
 		exit.onExit(0);

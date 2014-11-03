@@ -13,7 +13,7 @@ public abstract class CommandPacket extends PiPacket {
 	@Override
 	public byte[] toArray() {
 		byte[] header = getHeader(size);
-		byte[] packet = new byte[header.length + size];
+		byte[] packet = new byte[6 + size];
 		System.arraycopy(header, 0, packet, 0, header.length);
 		byte[] command = getData();
 		System.arraycopy(command, 0, packet, header.length, command.length);

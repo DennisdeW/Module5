@@ -1,50 +1,45 @@
 package ssh.command;
 
-import global.Logger;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.List;
 
+import net.PiSession;
+
 import org.apache.sshd.server.Environment;
 import org.apache.sshd.server.ExitCallback;
 
-/**
- * Debug command.
- * @author Dennis
- *
- */
-public class TestCommand extends PiCommand {
+public class LogoutCommand extends PiCommand {
 
-	public TestCommand(List<String> args) {
-		super(args);
-	}
+	private String name;
 	
-	public TestCommand(List<String> args, InputStream in, OutputStream out,
+	public LogoutCommand(List<String> args, InputStream in, OutputStream out,
 			OutputStream err, ExitCallback exit) {
 		super(args, in, out, err, exit);
+		name = args.get(1);
 	}
-	
+
 	@Override
 	public void start(Environment env) throws IOException {
-		System.out.println("Test Command Received!");
-		result += "Test Answer";
-		try {
-			//exit.onExit(0);			
-		} catch (Exception e) {
-			Logger.logError(e);
+		if (!canRun(name)) {
+			result += "Failure: not logged in";
+			return;
 		}
+		PiSession.logOut(name);
+		result += "Logged out.";
 	}
 
 	@Override
 	public void destroy() {
-		//NOP
+		// TODO Auto-generated method stub
+
 	}
 
 	@Override
 	public PiCommandType getType() {
-		return PiCommandType.TEST;
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }
