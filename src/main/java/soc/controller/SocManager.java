@@ -47,7 +47,7 @@ public class SocManager {
 			lock = new ReentrantLock();
 		}
 		if (GPIO == null) {
-			Timer timer = new Timer(1000);
+			Timer timer = new Timer(3000, true);
 			while (Spi.wiringPiSPISetup(0, connectionSpeed) == -1) {
 				try {
 					Runtime.getRuntime().exec("gpio load spi " + bufferSize);
