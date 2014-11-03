@@ -7,6 +7,7 @@ public abstract class PiPacket {
 	public abstract byte[] toArray();
 	public abstract byte[] getData();
 	public abstract PiPacketType getType();
+	public abstract String toString();
 	
 	protected byte[] getHeader(int length) {
 		byte[] res = new byte[6 + length];

@@ -4,6 +4,7 @@ import global.Logger;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 
 import javax.net.ssl.SSLSocket;
 
@@ -80,9 +81,10 @@ public class PiSession extends Thread {
 		}
 	}
 
-	private void sendPacket(AnswerPacket answer) {
-		// TODO Auto-generated method stub
-		
+	private void sendPacket(PiPacket answer) throws IOException {
+		Logger.log("Sending packet: " + answer);
+		OutputStream out = socket.getOutputStream();
+		out.write(answer.toArray());
 	}
 
 	private byte[] readHeader(InputStream is) throws IOException {

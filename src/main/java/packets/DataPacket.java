@@ -2,7 +2,6 @@ package packets;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
@@ -47,7 +46,13 @@ public class DataPacket extends PiPacket {
 			throw new IOException("Can't read source file!");
 		FileInputStream fis = new FileInputStream(source);
 		byte[] data = new byte[(int) source.length()];
+		fis.read(data);
+		fis.close();
 		return new DataPacket(data);
 	}
 
+	@Override
+	public String toString() {
+		return "[D|" + file.length + "]";
+	}
 }

@@ -3,11 +3,11 @@ package packets;
 public class AnswerPacket extends PiPacket {
 
 	private final String message;
-	
+
 	AnswerPacket(String message) {
 		this.message = message;
 	}
-	
+
 	@Override
 	public byte[] toArray() {
 		byte[] header = getHeader(message.length());
@@ -21,7 +21,7 @@ public class AnswerPacket extends PiPacket {
 	public String getMessage() {
 		return message;
 	}
-	
+
 	@Override
 	public byte[] getData() {
 		return message.getBytes();
@@ -32,4 +32,8 @@ public class AnswerPacket extends PiPacket {
 		return PiPacketType.ANSWER;
 	}
 
+	@Override
+	public String toString() {
+		return "[A|" + message + "]";
+	}
 }

@@ -45,4 +45,9 @@ public class SingleCommandPacket extends CommandPacket {
 	public byte[] getData() {
 		return commandString.getBytes();
 	}
+
+	@Override
+	public String toString() {
+		return "[SC|" + commandString + "]";
+	}
 }

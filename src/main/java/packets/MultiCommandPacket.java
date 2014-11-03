@@ -10,7 +10,7 @@ public class MultiCommandPacket extends CommandPacket {
 
 	private final CompoundCommand command;
 	private final String commandString;
-	
+
 	MultiCommandPacket(byte[] data) {
 		super(data.length - 6);
 		byte[] rawCommand = new byte[data.length - 6];
@@ -20,7 +20,8 @@ public class MultiCommandPacket extends CommandPacket {
 		try {
 			cc = (CompoundCommand) PiCommandType.getCommand(commandString);
 		} catch (ClassCastException e) {
-			Logger.logError("Command " + commandString + " was accepted as compound, but isn't");
+			Logger.logError("Command " + commandString
+					+ " was accepted as compound, but isn't");
 		}
 		command = cc;
 	}
@@ -47,4 +48,8 @@ public class MultiCommandPacket extends CommandPacket {
 		return commandString.getBytes();
 	}
 
+	@Override
+	public String toString() {
+		return "[MC|" + commandString + "]";
+	}
 }
