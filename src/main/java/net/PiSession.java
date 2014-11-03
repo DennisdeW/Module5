@@ -8,9 +8,9 @@ import java.io.OutputStream;
 
 import javax.net.ssl.SSLSocket;
 
-import packets.AnswerPacket;
-import packets.CommandPacket;
-import packets.PiPacket;
+import net.packets.AnswerPacket;
+import net.packets.CommandPacket;
+import net.packets.PiPacket;
 
 public class PiSession extends Thread {
 
