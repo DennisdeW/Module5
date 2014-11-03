@@ -26,7 +26,7 @@ public class GPIOSettings {
 	
 	private GpioPinDigitalOutput commandPin;
 	private GpioPinDigitalOutput piActivePin;
-	private GpioPinDigitalMultipurpose de1ActivePin;
+	private GpioPinDigitalInput de1ActivePin;
 	
 	/**
 	 * Creates new GPIO settings.
@@ -61,9 +61,9 @@ public class GPIOSettings {
 	 * Loads default GPIO settings.
 	 */
 	public GPIOSettings() {	
-		commandPinNr = 0;
+		commandPinNr = 5;
 		piActivePinNr = 1;
-		de1ActivePinNr = 2;
+		de1ActivePinNr = 4;
 		piActiveWaitTime = 100; //0.1 ms
 	}
 	
@@ -130,11 +130,11 @@ public class GPIOSettings {
 	 * @param gpio the gpio object used
 	 * @return the pin
 	 */
-	public GpioPinDigitalMultipurpose getDe1ActivePin(GpioController gpio) {
+	public GpioPinDigitalInput getDe1ActivePin(GpioController gpio) {
 		if (de1ActivePin == null) {
 			try {
-				de1ActivePin = gpio.provisionDigitalMultipurposePin(
-						(Pin)getPinField(de1ActivePinNr).get(null), PinMode.DIGITAL_INPUT);
+				de1ActivePin = gpio.provisionDigitalInputPin(
+						(Pin)getPinField(de1ActivePinNr).get(null));
 			} catch (IllegalArgumentException | IllegalAccessException e) {
 				return null;
 			}

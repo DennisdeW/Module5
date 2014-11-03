@@ -25,7 +25,6 @@ import com.pi4j.wiringpi.Spi;
 public class SocManager {
     
 	private static final int DEFAULT_CONNECTION_SPEED = 32000000;
-
 	private static final int DEFAULT_BUFFER_SIZE = 1000;
 
 	public static SocManager instance;
@@ -118,7 +117,9 @@ public class SocManager {
 		boolean fail = false;
 		int maxBuff = msg.getPacketSize();
 		// wait till DE1 is not sending
-		waitForPin(settings.getDe1ActivePin(GPIO), false, timeout);
+		if (!waitForPin(settings.getDe1ActivePin(GPIO), false, timeout)) {
+			System.out.println("Timeout");
+		}
 		// set encryption/decryption command pin		
 		settings.getCommandPin(GPIO).setState(!encrypt);
 		// tell the DE1 the Pi is going to send
@@ -151,8 +152,11 @@ public class SocManager {
 			}
 			if (sendSuccesfull) {
 				System.out.println("success 1");
+				System.out.println("High: " + settings.getDe1ActivePin(GPIO).isHigh());
+				System.out.println("Zero: " + Tools.allEqualTo(buffer, (byte)0));
 				// check for response from DE1
 				if (!Tools.allEqualTo(buffer, (byte)0) && (selfSending || settings.getDe1ActivePin(GPIO).isHigh())) {
+					System.out.println("Selfs: " + selfSending);
 					System.out.println("Got data (" + readIndex + " to " + (readIndex + maxBuff) + "): " + Arrays.toString(buffer));
 					System.arraycopy(buffer, 0, receivedBytes, i, maxBuff);
 					readIndex += maxBuff;
@@ -228,7 +232,7 @@ public class SocManager {
 				return false;
 			}
 		}	
-		return false;
+		return true;
 	}
 	
 	/**
@@ -273,7 +277,7 @@ public class SocManager {
 		int fileSize = args.length > 2 ? Integer.parseInt(args[2]) : 1000;
 		int bufferSize = args.length > 3 ? Integer.parseInt(args[3]) : 1000;
 		int timeOut = args.length > 4 ? Integer.parseInt(args[4]) : 1000;
-		boolean selfTest = args.length > 5 ? Boolean.parseBoolean(args[5]) : true;
+		boolean selfTest = args.length > 5 ? Boolean.parseBoolean(args[5]) : false;
 		SocManagerTest.testSocManager(sendSpeed, packetSize, fileSize, bufferSize, timeOut, selfTest);
 	}
 	

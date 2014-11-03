@@ -1,5 +1,22 @@
 package global;
 
+import java.awt.image.BufferedImage;
+import java.io.BufferedOutputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.Arrays;
+import java.util.zip.Deflater;
+import java.util.zip.DeflaterInputStream;
+import java.util.zip.DeflaterOutputStream;
+
 /**
  * A timer which can be used to check whether a certain time has elapsed.
  * 
@@ -140,5 +157,42 @@ public class Timer {
 		sb.append(", started:");
 		sb.append(started);
 		return sb.toString();
+	}
+	
+	public static void main(String[] args) {
+		// read picture
+		File file = new File("pf.png");
+		File fileSmall = new File("pf-small.png");
+		DataInputStream fis;
+		byte[] pic = new byte[(int) file.length()];
+		try {
+			fis = new DataInputStream(new FileInputStream(file));
+			fis.readFully(pic);
+		} catch (IOException e) {}
+		System.out.println("Size before: " + file.length());
+		// compress and write picture
+        OutputStream out = null;
+		try {
+			out = new BufferedOutputStream(new FileOutputStream(fileSmall));
+		} catch (FileNotFoundException e1) {}
+        Deflater def = new Deflater(Deflater.BEST_SPEED);
+        DeflaterOutputStream dout = new DeflaterOutputStream(out, def);
+        try {
+			dout.write(pic);
+	        dout.close();
+	        out.close();
+		} catch (IOException e) {}     
+     
+        /*DeflaterOutputStream dos = new DeflaterOutputStream(out, def, 1024);
+        byte[] newPic = new byte[pic.length];
+        int i;
+        try {
+        	while (dos.write(i) != -1) {
+        		
+        	}
+	        dos.close();
+		} catch (IOException e) {}*/
+		System.out.println("Size after: " + fileSmall.length());
+		
 	}
 }
