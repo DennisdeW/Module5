@@ -66,6 +66,7 @@ public class DecryptCommand extends PiCommand {
 		
 		if (!f.canRead()) {
 			Logger.logError("Cannot read file " + file + "!");
+			result += "The file could not be read!";
 			exit.onExit(0);
 			return;
 		}

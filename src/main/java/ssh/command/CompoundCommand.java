@@ -37,7 +37,8 @@ public class CompoundCommand extends PiCommand {
 		Logger.log("Running CompoundCommand with " + commands);
 		for (PiCommand pic : commands) {
 			Logger.log("Running command: " + pic);
-			pic.start(env);	
+			pic.start(env);
+			result += pic.result;
 		}
 		PiCommand.terminateSession = true;
 		

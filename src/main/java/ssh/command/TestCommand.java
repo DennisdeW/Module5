@@ -31,6 +31,7 @@ public class TestCommand extends PiCommand {
 		if (!canRun())
 			return;
 		System.out.println("Test Command Received!");
+		result += "Test Answer";
 		try {
 			exit.onExit(0);			
 		} catch (Exception e) {

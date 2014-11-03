@@ -28,6 +28,7 @@ public abstract class PiCommand implements Command {
 	protected OutputStream out, err;
 	protected ExitCallback exit;
 	protected String[] args;
+	protected String result;
 
 	public PiCommand(List<String> args) {
 		this.args = args.toArray(new String[] {});
@@ -36,6 +37,7 @@ public abstract class PiCommand implements Command {
 		} catch (UnsupportedOperationException e) {
 			Logger.logError(e);
 		}
+		result = "";
 	}
 
 	protected boolean canRun() {
@@ -50,6 +52,7 @@ public abstract class PiCommand implements Command {
 		this.out = out;
 		this.err = err;
 		this.exit = exit;
+		this.result = "";
 	}
 
 	public abstract PiCommandType getType();
@@ -205,5 +208,9 @@ public abstract class PiCommand implements Command {
 				Thread.currentThread().setName("SSH Command " + lastchar);
 			}
 		}
+	}
+
+	public String getResult() {
+		return result;
 	}
 }
