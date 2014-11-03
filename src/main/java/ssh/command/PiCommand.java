@@ -12,6 +12,7 @@ import org.apache.sshd.server.Command;
 import org.apache.sshd.server.ExitCallback;
 
 import ssh.SSHManager;
+import ssh.command.sftp.SFTPCommand;
 
 /**
  * Base class for commands.
@@ -21,6 +22,8 @@ import ssh.SSHManager;
  */
 public abstract class PiCommand implements Command {
 
+	public static boolean terminateSession = true;
+
 	protected InputStream in;
 	protected OutputStream out, err;
 	protected ExitCallback exit;
@@ -28,6 +31,11 @@ public abstract class PiCommand implements Command {
 
 	public PiCommand(List<String> args) {
 		this.args = args.toArray(new String[] {});
+		try {
+			throw new UnsupportedOperationException();
+		} catch (UnsupportedOperationException e) {
+			Logger.logError(e);
+		}
 	}
 
 	protected boolean canRun() {
@@ -35,9 +43,9 @@ public abstract class PiCommand implements Command {
 				|| getType() == PiCommandType.CREATE_USER;
 	}
 
-	public PiCommand(String[] args, InputStream in, OutputStream out,
+	public PiCommand(List<String> args, InputStream in, OutputStream out,
 			OutputStream err, ExitCallback exit) {
-		this.args = args;
+		this.args = args.toArray(new String[] {});
 		this.in = in;
 		this.out = out;
 		this.err = err;
@@ -74,8 +82,9 @@ public abstract class PiCommand implements Command {
 	 */
 	public enum PiCommandType {
 		TEST("test", TestCommand.class), GET_USER("user", GetUserCommand.class), CREATE_USER(
-				"create", CreateUserCommand.class), STOP("stop", StopCommand.class), DUMMY("",
-				DummyCommand.class);
+				"create", CreateUserCommand.class), STOP("stop",
+				StopCommand.class), DECRYPT("decrypt", DecryptCommand.class), SFTP(
+				"sftp", SFTPCommand.class), DUMMY("", DummyCommand.class);
 
 		private String command;
 		private Class<? extends PiCommand> clazz;
@@ -92,7 +101,6 @@ public abstract class PiCommand implements Command {
 		}
 
 		private PiCommand _getCommand(String args) {
-			System.out.println("PiCommand.PiCommandType.getCommand()");
 			PiCommand comm = null;
 			try {
 				comm = clazz.getConstructor(List.class).newInstance(
@@ -108,7 +116,6 @@ public abstract class PiCommand implements Command {
 
 		private PiCommand _getCommand(String args, InputStream in,
 				OutputStream out, OutputStream err, ExitCallback exit) {
-			System.out.println("PiCommand.PiCommandType.getCommand()");
 			PiCommand comm = null;
 			try {
 				comm = clazz.getConstructor(List.class, InputStream.class,
@@ -117,17 +124,10 @@ public abstract class PiCommand implements Command {
 						Arrays.asList(args.split("-")), in, out, err, exit);
 			} catch (InstantiationException | IllegalAccessException
 					| IllegalArgumentException | InvocationTargetException
-					| NoSuchMethodException | SecurityException e) {
-				try {
-					comm = clazz.getConstructor(List.class).newInstance(
-							Arrays.asList(args.split("-")));
-				} catch (InstantiationException | IllegalAccessException
-						| IllegalArgumentException | InvocationTargetException
-						| NoSuchMethodException | SecurityException e2) {
-					Logger.logError("Could not run standard command: " + e
-							+ "\n" + e2);
-					e.printStackTrace();
-				}
+					| NoSuchMethodException | SecurityException e2) {
+				Logger.logError("Could not run standard command: " + e2);
+				e2.printStackTrace();
+
 			}
 			return comm;
 		}
@@ -144,6 +144,7 @@ public abstract class PiCommand implements Command {
 			for (PiCommandType type : values())
 				if (type.command.equalsIgnoreCase(command))
 					return type;
+			Logger.logError("Unrecognized command: " + command);
 			return DUMMY;
 		}
 
@@ -151,13 +152,19 @@ public abstract class PiCommand implements Command {
 		 * Gets the command which is bound to the given string.<br>
 		 * Commands should be structured as follows:<br>
 		 * <i>command-arg1-arg2-...-argN</i>
-		 * @param command The command with arguments, as above.
+		 * 
+		 * @param command
+		 *            The command with arguments, as above.
 		 * @return The command, supplied with the arguments.
 		 */
 		public static PiCommand getCommand(String command) {
-			Logger.log("Received Command: " + command + " (sender="
-					+ SSHManager.username + ")");
 			renameThread();
+			if (command.startsWith("create"))
+				Logger.log("Received Create User Command: "
+						+ command.split("-")[1]);
+			else
+				Logger.log("Received Command: " + command + " (sender="
+						+ SSHManager.username + ")");
 			PiCommandType type = null;
 			try {
 				type = typeOf(command.split("-")[0]);
@@ -172,7 +179,13 @@ public abstract class PiCommand implements Command {
 
 		public static PiCommand getCommand(String command, InputStream in,
 				OutputStream out, OutputStream err, ExitCallback exit) {
-			System.out.println("PiCommand.PiCommandType.getCommand()");
+			renameThread();
+			if (command.startsWith("create"))
+				Logger.log("Received Create User Command: "
+						+ command.split("-")[1]);
+			else
+				Logger.log("Received Command: " + command + " (sender="
+						+ SSHManager.username + ")");
 			PiCommandType type = null;
 			try {
 				type = typeOf(command.split("-")[0]);
@@ -184,7 +197,7 @@ public abstract class PiCommand implements Command {
 						+ "\" is not implemented!");
 			return type._getCommand(command, in, out, err, exit);
 		}
-		
+
 		private static void renameThread() {
 			String cur = Thread.currentThread().getName();
 			if (cur.contains("sshd")) {

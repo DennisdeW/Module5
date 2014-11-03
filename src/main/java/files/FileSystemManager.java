@@ -51,6 +51,9 @@ public class FileSystemManager implements Observer, Runnable {
 		} catch (InterruptedException e) {
 			Logger.logError(e);
 		}
+		
+		//Remove leftover temporary files
+		TemporaryFile.cleanTemporaryFiles();
 	}
 
 	@Override

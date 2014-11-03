@@ -16,7 +16,7 @@ public class PiSFTPFactory implements NamedFactory<Command> {
 
 	@Override
 	public Command create() {
-		SftpSubsystem sftp = (SftpSubsystem) new SftpSubsystem.Factory()
+		SftpSubsystem sftp = (SftpSubsystem) new PiSFTPSubsystem.Factory()
 				.create();
 		sftp.setFileSystemView(PiFileSystemFactory.INSTANCE
 				.createFileSystemView(SSHManager.session));

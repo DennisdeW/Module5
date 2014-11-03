@@ -3,9 +3,12 @@ package ssh.command;
 import global.Logger;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.List;
 
 import org.apache.sshd.server.Environment;
+import org.apache.sshd.server.ExitCallback;
 
 import ssh.SSHManager;
 
@@ -19,6 +22,11 @@ public class StopCommand extends PiCommand {
 	public StopCommand(List<String> args) {
 		super(args);
 	}
+	
+	public StopCommand(List<String> args, InputStream in, OutputStream out,
+			OutputStream err, ExitCallback exit) {
+		super(args, in, out, err, exit);
+	}
 
 	@Override
 	public void start(Environment env) throws IOException {
@@ -28,6 +36,7 @@ public class StopCommand extends PiCommand {
 			SSHManager.stop();
 		else
 			Logger.log("STOP received with wrong password.");
+		exit.onExit(0);
 	}
 
 	@Override
