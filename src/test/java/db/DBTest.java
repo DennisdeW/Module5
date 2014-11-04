@@ -87,6 +87,12 @@ public class DBTest {
 			Assert.fail("Exception occured checking for file presence:" + e1);
 		}
 
+		try {
+			Assert.assertEquals(18, FileStatementMaker.getTotalSpaceForUser(uid));
+		} catch (SQLException e2) {
+			Assert.fail("Exception occured getting file size:" + e2);
+		}
+		
 		Set<FileDescriptor> actualFiles = new HashSet<>();
 		actualFiles.addAll(Arrays.asList(testFileA, testFileB));
 		Set<FileDescriptor> retrievedFiles = null;

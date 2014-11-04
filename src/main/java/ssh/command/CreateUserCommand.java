@@ -52,11 +52,11 @@ public class CreateUserCommand extends PiCommand {
 			/*PiFileSystemFactory.register(args[1]);
 			FileSystemManager.register(args[1]);
 			*/
-			result += "Account \"" + args[1] + "\" was created.";
+			result += "true";
 			PiSession.logIn(args[1]);
 		} catch (SQLException | UnknownUserException e) {
 			Logger.logError("Failed to create user: " + e);
-			result += "An error occurred. The account was not created.";
+			result += "false";
 		} finally {
 			exit.onExit(0);
 		}

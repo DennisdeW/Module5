@@ -1,6 +1,7 @@
 package db;
 
 import java.io.FileNotFoundException;
+import java.math.BigDecimal;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -76,6 +77,18 @@ public class FileStatementMaker {
 		DatabaseManager.registerResult(result, statement);
 		Tuple[] tuples = Tuple.fromResultSet(result);
 		return tuples.length > 0;
+	}
+
+	public static int getTotalSpaceForUser(int uid) throws SQLException {
+		PreparedStatement statement = DatabaseManager
+				.prepare("SELECT SUM(size) FROM \"File\" WHERE owner = ?");
+		statement.setInt(1, uid);
+		ResultSet result = statement.executeQuery();
+		DatabaseManager.registerResult(result, statement);
+		Tuple[] tuples = Tuple.fromResultSet(result);
+		if (tuples.length == 0)
+			return 0;
+		return ((BigDecimal) tuples[0].getItem(0)).intValue();
 	}
 
 }

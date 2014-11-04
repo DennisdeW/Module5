@@ -23,11 +23,11 @@ public class LogoutCommand extends PiCommand {
 	@Override
 	public void start(Environment env) throws IOException {
 		if (!canRun(name)) {
-			result += "Failure: not logged in";
+			result += "false";
 			return;
 		}
 		PiSession.logOut(name);
-		result += "Logged out.";
+		result += "true";
 	}
 
 	@Override

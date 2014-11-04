@@ -118,10 +118,12 @@ public class PiSession extends Thread {
 	}
 
 	public static synchronized void logIn(String user) {
+		Logger.log(user + " logged in.");
 		LOGGED_IN.put(user, true);
 	}
 	
 	public static synchronized void logOut(String user) {
+		Logger.log(user + " logged out.");
 		LOGGED_IN.put(user, false);
 	}
 	

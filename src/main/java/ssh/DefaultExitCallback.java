@@ -17,7 +17,7 @@ public class DefaultExitCallback implements ExitCallback {
 
 	@Override
 	public void onExit(int exitValue) {
-		if (PiCommand.terminateSession) {
+		/*if (PiCommand.terminateSession) {
 			Logger.log("Terminating Session");
 			try {
 				//SSHManager.session.exceptionCaught(new SshException(
@@ -25,7 +25,7 @@ public class DefaultExitCallback implements ExitCallback {
 			} catch (Throwable t) {
 			}
 		} else
-			Logger.log("Ignoring terminate command");
+			Logger.log("Ignoring terminate command");*/
 	}
 
 	@Override

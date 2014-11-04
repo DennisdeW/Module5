@@ -18,16 +18,11 @@ public class DeleteUserCommand extends PiCommand {
 
 	private int id;
 	private String name;
-	
+
 	public DeleteUserCommand(List<String> args, InputStream in,
 			OutputStream out, OutputStream err, ExitCallback exit) {
 		super(args, in, out, err, exit);
-		try {
-			id = UserStatementMaker.getId(args.get(1));
-			name = args.get(1);
-		} catch (SQLException | UnknownUserException e) {
-			result += "This account does not exists. ";
-		}
+		name = args.get(1);
 	}
 
 	@Override
@@ -37,11 +32,12 @@ public class DeleteUserCommand extends PiCommand {
 			return;
 		}
 		try {
+			id = UserStatementMaker.getId(name);
 			UserStatementMaker.deleteAccount(id);
-			result += "Account deleted.";
-		} catch (SQLException e) {
+			result += "true";
+		} catch (SQLException | UnknownUserException e) {
 			Logger.logError(e);
-			result += "The account could not be deleted.";
+			result += "false";
 		}
 
 	}

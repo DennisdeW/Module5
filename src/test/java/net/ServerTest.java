@@ -1,7 +1,5 @@
 package net;
 
-import global.Logger;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -12,6 +10,7 @@ import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
 
 import net.packets.AnswerPacket;
+import net.packets.SingleCommandPacket;
 
 import org.junit.After;
 import org.junit.Before;
@@ -48,12 +47,15 @@ public class ServerTest {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		PiServer.stopServer();
+		//PiServer.stopServer();
 	}
 
 	@Test
 	public void TestSingleCommands() throws IOException {
 		out.write(AnswerPacket.getPacket("Hello World!").toArray());
+		out.write(SingleCommandPacket.create("login-Dennis-Wachtwoord").toArray());
+		out.write(SingleCommandPacket.create("upload-Dennis-500").toArray());
+		out.write(SingleCommandPacket.create("logout-Dennis").toArray());
 	}
-
+	
 }

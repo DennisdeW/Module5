@@ -14,10 +14,10 @@ public class SingleCommandPacket extends CommandPacket {
 	private final String commandString;
 
 	SingleCommandPacket(byte[] data) {
-		super(data.length - 6);
-		int commandLength = data.length - 6;
+		super(data.length);
+		int commandLength = data.length;
 		byte[] command = new byte[commandLength];
-		System.arraycopy(data, 6, command, 0, data.length - 6);
+		System.arraycopy(data, 0, command, 0, data.length);
 		this.commandString = new String(command);
 		this.command = PiCommandType.getCommand(commandString, null, null,
 				null, new DefaultExitCallback());
@@ -52,5 +52,9 @@ public class SingleCommandPacket extends CommandPacket {
 	@Override
 	public String toString() {
 		return "[SC|" + commandString + "]";
+	}
+	
+	public static SingleCommandPacket create(String command) {
+		return new SingleCommandPacket(command.getBytes());
 	}
 }
