@@ -5,6 +5,8 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
+import org.bouncycastle.util.Arrays;
+
 public class DataPacket extends PiPacket {
 
 	private final byte[] file;
@@ -55,5 +57,9 @@ public class DataPacket extends PiPacket {
 	@Override
 	public String toString() {
 		return "[D|" + file.length + "]";
+	}
+
+	public static DataPacket create(byte[] raw) {
+		return new DataPacket(Arrays.concatenate(new byte[6], raw));
 	}
 }

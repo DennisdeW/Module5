@@ -1,5 +1,6 @@
 package net;
 
+import files.FileDescriptor;
 import files.NullCrypto;
 import global.Logger;
 
@@ -16,6 +17,10 @@ import java.util.Random;
 
 import javax.net.ssl.SSLSocket;
 
+import ssh.command.CheckUploadCommand;
+import ssh.command.DownloadCommand;
+import db.FileStatementMaker;
+import db.UnknownUserException;
 import db.UserStatementMaker;
 import net.packets.AnswerPacket;
 import net.packets.CommandPacket;
@@ -102,14 +107,25 @@ public class PiSession extends Thread {
 								+ new String(packet.getData()));
 						AnswerPacket answer = ((CommandPacket) packet).run();
 						sendPacket(answer);
+						if (DownloadCommand.packet != null) {
+							sendPacket(DownloadCommand.packet);
+							DownloadCommand.packet = null;
+						}	
 						break;
 					case FILE:
 						// TODO
 						Logger.log("Receiving file...");
-						File f = ((DataPacket) packet)
-								.saveToFile("test\\test.file");
-						File encrypted = new NullCrypto().encrypt(packet.getData());
-						// f.delete();
+						File encrypted = new NullCrypto().encrypt(packet
+								.getData());
+						try {
+							FileStatementMaker.addDescriptor(new FileDescriptor(
+									encrypted.getName(),
+									UserStatementMaker
+											.getId(CheckUploadCommand.lastUser),
+									packet.getData().length));
+						} catch (SQLException | UnknownUserException e) {
+							Logger.logError(e);	
+						}
 						Logger.log("File Saved! -- " + encrypted.getName());
 						sendPacket(AnswerPacket.getPacket(encrypted.getName()));
 						break;
