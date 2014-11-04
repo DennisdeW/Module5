@@ -1,12 +1,15 @@
 package soc.controller;
 
+import files.Crypto;
 import global.Logger;
 import global.Timer;
 import global.Tools;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.concurrent.locks.ReentrantLock;
+
 import soc.model.GPIOSettings;
 import soc.model.Message;
 
@@ -286,6 +289,18 @@ public class SocManager implements Crypto {
 	public static void init() {
 		GPIOSettings settings = new GPIOSettings();
 		instance = new SocManager(settings, DEFAULT_CONNECTION_SPEED, DEFAULT_BUFFER_SIZE);
+	}
+
+	@Override
+	public File decrypt(byte[] cipher) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public File encrypt(byte[] plain) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }
