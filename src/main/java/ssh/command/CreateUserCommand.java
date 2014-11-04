@@ -54,7 +54,7 @@ public class CreateUserCommand extends PiCommand {
 			*/
 			result += "true";
 			PiSession.logIn(args[1]);
-		} catch (SQLException | UnknownUserException e) {
+		} catch (SQLException | UnknownUserException | IllegalArgumentException e) {
 			Logger.logError("Failed to create user: " + e);
 			result += "false";
 		} finally {

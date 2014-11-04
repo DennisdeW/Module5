@@ -19,7 +19,7 @@ public class SingleCommandPacket extends CommandPacket {
 		byte[] command = new byte[commandLength];
 		System.arraycopy(data, 0, command, 0, data.length);
 		this.commandString = new String(command);
-		this.command = PiCommandType.getCommand(commandString, null, null,
+		this.command = PiCommandType.getCommand(commandString.substring(6), null, null,
 				null, new DefaultExitCallback());
 	}
 
@@ -46,7 +46,7 @@ public class SingleCommandPacket extends CommandPacket {
 
 	@Override
 	public byte[] getData() {
-		return commandString.getBytes();
+		return commandString.substring(6).getBytes();
 	}
 
 	@Override

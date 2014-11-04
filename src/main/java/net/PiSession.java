@@ -1,14 +1,18 @@
 package net;
 
+import files.NullCrypto;
 import global.Logger;
 
+import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.SocketException;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
 
 import javax.net.ssl.SSLSocket;
 
@@ -22,7 +26,7 @@ public class PiSession extends Thread {
 
 	private static volatile int index;
 	private static final Map<String, Boolean> LOGGED_IN;
-	
+
 	static {
 		LOGGED_IN = new HashMap<>();
 		try {
@@ -63,14 +67,13 @@ public class PiSession extends Thread {
 
 	public void run() {
 		Logger.log("Starting session for " + socket.getInetAddress());
-		/*try {
-			sendPacket(AnswerPacket.getPacket("Hallo Rob!"));
-		} catch (IOException e2) {
-			e2.printStackTrace();
-		}*/
+		/*
+		 * try { sendPacket(AnswerPacket.getPacket("Hallo Rob!")); } catch
+		 * (IOException e2) { e2.printStackTrace(); }
+		 */
 		InputStream is = null;
 		try {
-			is = socket.getInputStream();
+			is = new BufferedInputStream(socket.getInputStream());
 		} catch (IOException e1) {
 			Logger.logError(e1);
 			return;
@@ -79,37 +82,53 @@ public class PiSession extends Thread {
 			try {
 				byte[] header = new byte[6];
 				if (is.read(header) > 0) {
-					Logger.log("receiving packet");
 					int datalen = PiPacket.getPacketLength(header);
 					byte[] raw = new byte[6 + datalen];
 					System.arraycopy(header, 0, raw, 0, 6);
-					is.read(raw, 6, datalen);
+					int i = 6;
+					while (i < datalen && (i += is.read(raw, i, datalen + 6 - i)) != -1){}
+//					System.out.println(is.read(raw, 6, datalen));
 					PiPacket packet = PiPacket.readPacket(raw);
 					switch (packet.getType()) {
 					case ANSWER:
-						Logger.log("Answer Packet Received:\n\t\t\t" + new String(packet.getData()));
+						Logger.log("Answer Packet Received:\n\t\t\t"
+								+ new String(packet.getData()));
 						break;
 					case COMPOUND_COMMAND:
 					case SINGLE_COMMAND:
-						Logger.log("Command packet received: " + new String(packet.getData()));
+						Logger.log("Command packet received: "
+								+ new String(packet.getData()));
 						AnswerPacket answer = ((CommandPacket) packet).run();
 						sendPacket(answer);
 						break;
 					case FILE:
-						//TODO
-						File f = ((DataPacket) packet).saveToFile("test\test.file");
-						
+						// TODO
+						Logger.log("Receiving file...");
+						File f = ((DataPacket) packet)
+								.saveToFile("test\\test.file");
+						File encrypted = new NullCrypto().encrypt(f);
+						//f.delete();
+						Logger.log("File Saved! -- " + encrypted.getName());
+						sendPacket(AnswerPacket.getPacket(/*encrypted.getName()*/ new Random().nextLong()
+								+ ""));
+						break;
+					case INVALID:
+						Logger.logError("Invalid Packet: "+ packet.toString());
 						break;
 					default:
 						throw new Error("Impossible");
 					}
-					
+
 				} else {
 					try {
 						sleep(200);
 					} catch (InterruptedException e) {
 					}
 				}
+			} catch (SocketException e) {
+				server.unregister(this);
+				Logger.log("Client terminated connection.");
+				return;
 			} catch (IOException e) {
 				Logger.logError(e);
 				stopSession();
@@ -121,16 +140,16 @@ public class PiSession extends Thread {
 		Logger.log(user + " logged in.");
 		LOGGED_IN.put(user, true);
 	}
-	
+
 	public static synchronized void logOut(String user) {
 		Logger.log(user + " logged out.");
 		LOGGED_IN.put(user, false);
 	}
-	
+
 	public static synchronized boolean isLoggedIn(String user) {
 		return LOGGED_IN.containsKey(user) && LOGGED_IN.get(user);
 	}
-	
+
 	private void printPacket(byte[] raw) {
 		System.out.print("[");
 		for (byte b : raw)

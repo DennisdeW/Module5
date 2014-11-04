@@ -88,6 +88,7 @@ public class PiServer extends Thread {
 	public static void main(String[] args) throws IOException {
 		// Security.addProvider(new BouncyCastleProvider());
 		// Certificate kp = getCertificate();
+		Logger.init();
 		instance = new PiServer();
 		instance.start();
 	}

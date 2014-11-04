@@ -86,7 +86,7 @@ public class FileStatementMaker {
 		ResultSet result = statement.executeQuery();
 		DatabaseManager.registerResult(result, statement);
 		Tuple[] tuples = Tuple.fromResultSet(result);
-		if (tuples.length == 0)
+		if (tuples.length == 0 || tuples[0].getItems().length == 0 || tuples[0].getItem(0) == null)
 			return 0;
 		return ((BigDecimal) tuples[0].getItem(0)).intValue();
 	}
