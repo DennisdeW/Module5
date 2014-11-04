@@ -22,7 +22,7 @@ import com.pi4j.wiringpi.Spi;
  * 
  * @author rvemous
  */
-public class SocManager {
+public class SocManager implements Crypto {
     
 	private static final int DEFAULT_CONNECTION_SPEED = 32000000;
 	private static final int DEFAULT_BUFFER_SIZE = 1000;
@@ -96,6 +96,8 @@ public class SocManager {
 	public synchronized Message sendAndReceiveData(Message msg, boolean encrypt, long timeout) {
 		return sendAndReceiveData(msg, encrypt, timeout, false);
 	}
+	
+	
 
 	/**
 	 * Sends the data to the DE1 SoC for encryption/decryption or sends to

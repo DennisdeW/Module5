@@ -120,14 +120,14 @@ public class DatabaseManager {
 	public static void main(String[] args) throws SQLException, IOException {
 		Logger.init();
 		init();
-		byte[] buf = new byte[65536];
-		PasswordGetter.INSTANCE.getKey(buf);
-		File file = new File("key.bin");
-		FileInputStream fos = new FileInputStream(file);
-		byte[] key = new byte[65536];
-		fos.read(key);
-		fos.close();
-		Logger.log("Keys match: " + Arrays.equals(buf, key));
+		//byte[] buf = new byte[65536];
+		//PasswordGetter.INSTANCE.getKey(buf);
+		//File file = new File("key.bin");
+		//FileInputStream fos = new FileInputStream(file);
+		//byte[] key = new byte[65536];
+		//fos.read(key);
+		//fos.close();
+		//Logger.log("Keys match: " + Arrays.equals(buf, key));
 		
 		Statement s = DB_CONN.createStatement();
 		ResultSet r = s.executeQuery("SELECT * FROM \"Users\";");
