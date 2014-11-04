@@ -157,12 +157,12 @@ public class DatabaseManager {
 		Logger.log("Terminating...");
 	}
 
-	protected static void registerResult(ResultSet r, PreparedStatement s) {
+	static void registerResult(ResultSet r, PreparedStatement s) {
 		activeResults.put(r, new WeakReference<PreparedStatement>(s));
 		activeStatements.add(s);
 	}
 
-	protected static PreparedStatement prepare(String sql) throws SQLException {
+	static PreparedStatement prepare(String sql) throws SQLException {
 		return DB_CONN.prepareStatement(sql);
 	}
 	

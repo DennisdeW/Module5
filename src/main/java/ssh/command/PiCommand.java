@@ -87,11 +87,12 @@ public abstract class PiCommand implements Command {
 	public enum PiCommandType {
 		TEST("test", TestCommand.class), GET_USER("user", GetUserCommand.class), CREATE_USER(
 				"create", CreateUserCommand.class), STOP("stop",
-				StopCommand.class), DECRYPT("decrypt", DecryptCommand.class), SFTP(
-				"sftp", SFTPCommand.class), DUMMY("", DummyCommand.class), CHECK_USER(
-				"checkUser", CheckUserCommand.class), DELETE_USER("delete",
+				StopCommand.class), DECRYPT("decrypt", DecryptCommand.class), DUMMY(
+				"", DummyCommand.class), CHECK_USER("checkUser",
+				CheckUserCommand.class), DELETE_USER("delete",
 				DeleteUserCommand.class), LOGIN("login", LoginCommand.class), LOGOUT(
-				"logout", LogoutCommand.class);
+				"logout", LogoutCommand.class), CHECK_UPLOAD("upload",
+				CheckUploadCommand.class);
 
 		private String command;
 		private Class<? extends PiCommand> clazz;

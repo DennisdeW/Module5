@@ -16,6 +16,7 @@ import ssh.SSHManager;
 
 /**
  * Command to stop the server.
+ * 
  * @author Dennis
  *
  */
@@ -24,7 +25,7 @@ public class StopCommand extends PiCommand {
 	public StopCommand(List<String> args) {
 		super(args);
 	}
-	
+
 	public StopCommand(List<String> args, InputStream in, OutputStream out,
 			OutputStream err, ExitCallback exit) {
 		super(args, in, out, err, exit);
@@ -32,12 +33,17 @@ public class StopCommand extends PiCommand {
 
 	@Override
 	public void start(Environment env) throws IOException {
-		if (!canRun(args[1]))
+		if (!canRun(args[1])) {
+			result += "false";
 			return;
-		if (args[2].equals("reallyactuallystop"))
+		}
+		if (args[2].equals("reallyactuallystop")) {
 			PiServer.stopServer();
-		else
+			result += "true";
+		} else {
 			Logger.log("STOP received with wrong password.");
+			result += "false";
+		}
 		exit.onExit(0);
 	}
 

@@ -1,5 +1,7 @@
 package net.packets;
 
+import java.util.Arrays;
+
 public abstract class PiPacket {
 
 	public static final byte[] MAGIC = new byte[]{80, 73};
@@ -25,19 +27,15 @@ public abstract class PiPacket {
 	}
 
 	public static PiPacketType getType(byte[] header) {
-		int relevant = header[2];
-		relevant >>= 30;
+		byte relevant = header[2];
+		relevant >>>= 6;
 		relevant &= 3;
-		return PiPacketType.forId(relevant );
+		return PiPacketType.forId(relevant);
 	}
 
 	public static int getPacketLength(byte[] header) {
 		byte[] relevant = new byte[4];
 		System.arraycopy(header, 2, relevant, 0, 4);
-		System.out.print("[");
-		for (byte b : relevant)
-			System.out.print(b + "|");
-		System.out.println("]");
 		int length = relevant[0] & 0x3F;
 		length <<= 8;
 		length += ((int) relevant[1] & 0xFF);
@@ -50,11 +48,14 @@ public abstract class PiPacket {
 
 	public static PiPacket readPacket(byte[] data) {
 		PiPacketType type = getType(data);
+		if (Arrays.equals(new byte[]{data[0], data[1]}, MAGIC))
+			
 		return type.getPacket(data);
+		return new InvalidPacket(data.length);
 	}
 
 	public enum PiPacketType {
-		SINGLE_COMMAND(0), COMPOUND_COMMAND(1), FILE(2), ANSWER(3);
+		SINGLE_COMMAND(0), COMPOUND_COMMAND(1), FILE(2), ANSWER(3), INVALID(99);
 
 		private final int id;
 
@@ -69,6 +70,8 @@ public abstract class PiPacket {
 		public PiPacket getPacket(byte[] data) {
 			switch (this) {
 			case ANSWER:
+				if (data.length > 50)
+					return new AnswerPacket("<<Too long>>");
 				byte[] message = new byte[data.length - 6];
 				System.arraycopy(data, 6, message, 0, message.length);
 				return new AnswerPacket(new String(message));

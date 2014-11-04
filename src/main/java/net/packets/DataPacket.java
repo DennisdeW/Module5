@@ -11,7 +11,7 @@ public class DataPacket extends PiPacket {
 	
 	DataPacket(byte[] data) {
 		file = new byte[data.length - 6];
-		System.arraycopy(data, 0, file, 0, file.length);
+		System.arraycopy(data, 6, file, 0, file.length);
 	}
 	
 	@Override
