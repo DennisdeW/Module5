@@ -1,5 +1,6 @@
 package net;
 
+import files.FileDescriptor;
 import files.NullCrypto;
 import global.Logger;
 
@@ -16,6 +17,10 @@ import java.util.Random;
 
 import javax.net.ssl.SSLSocket;
 
+import ssh.command.CheckUploadCommand;
+import ssh.command.DownloadCommand;
+import db.FileStatementMaker;
+import db.UnknownUserException;
 import db.UserStatementMaker;
 import net.packets.AnswerPacket;
 import net.packets.CommandPacket;
@@ -86,8 +91,10 @@ public class PiSession extends Thread {
 					byte[] raw = new byte[6 + datalen];
 					System.arraycopy(header, 0, raw, 0, 6);
 					int i = 6;
-					while (i < datalen && (i += is.read(raw, i, datalen + 6 - i)) != -1){}
-//					System.out.println(is.read(raw, 6, datalen));
+					while (i < datalen
+							&& (i += is.read(raw, i, datalen + 6 - i)) != -1) {
+					}
+					// System.out.println(is.read(raw, 6, datalen));
 					PiPacket packet = PiPacket.readPacket(raw);
 					switch (packet.getType()) {
 					case ANSWER:
@@ -100,20 +107,30 @@ public class PiSession extends Thread {
 								+ new String(packet.getData()));
 						AnswerPacket answer = ((CommandPacket) packet).run();
 						sendPacket(answer);
+						if (DownloadCommand.packet != null) {
+							sendPacket(DownloadCommand.packet);
+							DownloadCommand.packet = null;
+						}	
 						break;
 					case FILE:
 						// TODO
 						Logger.log("Receiving file...");
-						File f = ((DataPacket) packet)
-								.saveToFile("test\\test.file");
-						File encrypted = new NullCrypto().encrypt(f);
-						//f.delete();
+						File encrypted = new NullCrypto().encrypt(packet
+								.getData());
+						try {
+							FileStatementMaker.addDescriptor(new FileDescriptor(
+									encrypted.getName(),
+									UserStatementMaker
+											.getId(CheckUploadCommand.lastUser),
+									packet.getData().length));
+						} catch (SQLException | UnknownUserException e) {
+							Logger.logError(e);	
+						}
 						Logger.log("File Saved! -- " + encrypted.getName());
-						sendPacket(AnswerPacket.getPacket(/*encrypted.getName()*/ new Random().nextLong()
-								+ ""));
+						sendPacket(AnswerPacket.getPacket(encrypted.getName()));
 						break;
 					case INVALID:
-						Logger.logError("Invalid Packet: "+ packet.toString());
+						Logger.logError("Invalid Packet: " + packet.toString());
 						break;
 					default:
 						throw new Error("Impossible");

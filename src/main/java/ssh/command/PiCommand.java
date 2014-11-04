@@ -92,7 +92,9 @@ public abstract class PiCommand implements Command {
 				CheckUserCommand.class), DELETE_USER("delete",
 				DeleteUserCommand.class), LOGIN("login", LoginCommand.class), LOGOUT(
 				"logout", LogoutCommand.class), CHECK_UPLOAD("upload",
-				CheckUploadCommand.class);
+				CheckUploadCommand.class), DOWNLOAD("download",
+				DownloadCommand.class), CHECK_FILE("checkFile",
+				CheckFileCommand.class);
 
 		private String command;
 		private Class<? extends PiCommand> clazz;

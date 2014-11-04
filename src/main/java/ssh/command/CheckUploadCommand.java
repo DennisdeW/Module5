@@ -17,6 +17,7 @@ import db.UserStatementMaker;
 
 public class CheckUploadCommand extends PiCommand {
 
+	public static String lastUser;
 	private String user;
 	private int filesize;
 
@@ -24,6 +25,7 @@ public class CheckUploadCommand extends PiCommand {
 			OutputStream out, OutputStream err, ExitCallback exit) {
 		super(args, in, out, err, exit);
 		this.user = args.get(1);
+		lastUser = user;
 		this.filesize = Integer.parseInt(args.get(2));
 	}
 

@@ -312,4 +312,16 @@ public class SocManager implements Crypto {
 		instance = new SocManager(settings, DEFAULT_CONNECTION_SPEED, DEFAULT_BUFFER_SIZE);
 	}
 
+	@Override
+	public File decrypt(byte[] cipher) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public File encrypt(byte[] plain) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }
