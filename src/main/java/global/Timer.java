@@ -182,16 +182,6 @@ public class Timer {
 	        dout.close();
 	        out.close();
 		} catch (IOException e) {}     
-     
-        /*DeflaterOutputStream dos = new DeflaterOutputStream(out, def, 1024);
-        byte[] newPic = new byte[pic.length];
-        int i;
-        try {
-        	while (dos.write(i) != -1) {
-        		
-        	}
-	        dos.close();
-		} catch (IOException e) {}*/
 		System.out.println("Size after: " + fileSmall.length());
 		
 	}

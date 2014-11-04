@@ -31,7 +31,7 @@ public class SocManagerTest {
 		// generate 1.000.000 bytes of data
 		byte[] data = new byte[fileSize];
 		for (int i = 0; i < data.length; i++) {
-			data[i] = (byte) (i % Byte.MAX_VALUE);
+			data[i] = 1;//(byte) (i % Byte.MAX_VALUE);
 		}
 		Message msg = new Message(data, false, packetSize);
 		// check for msg data to be a multiple of packetSize bytes

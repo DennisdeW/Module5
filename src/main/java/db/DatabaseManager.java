@@ -53,7 +53,11 @@ public class DatabaseManager {
 			Properties props = new Properties();
 			props.setProperty("user", "postgres");
 			props.setProperty("password", "piCloud");
-			t = DriverManager.getConnection("jdbc:postgresql://localhost/piCloud", props);
+			if (Platform.isLinux()) {
+				t = DriverManager.getConnection("jdbc:postgresql://localhost/picloud", props);
+			} else {
+				t = DriverManager.getConnection("jdbc:postgresql://localhost/piCloud", props);
+			}
 		} catch (ClassNotFoundException | SQLException e) {
 			e.printStackTrace();
 			System.exit(1);
