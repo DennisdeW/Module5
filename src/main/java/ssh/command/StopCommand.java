@@ -8,6 +8,7 @@ import java.io.OutputStream;
 import java.util.List;
 
 import net.PiServer;
+import net.PiSession;
 
 import org.apache.sshd.server.Environment;
 import org.apache.sshd.server.ExitCallback;
@@ -33,17 +34,16 @@ public class StopCommand extends PiCommand {
 
 	@Override
 	public void start(Environment env) throws IOException {
-		if (!canRun(args[1])) {
-			result += "false";
-			return;
-		}
-		if (args[2].equals("reallyactuallystop")) {
-			PiServer.stopServer();
-			result += "true";
-		} else {
-			Logger.log("STOP received with wrong password.");
-			result += "false";
-		}
+		if (PiSession.getUser() != null)
+			if (args[1].equals("reallyactuallystop")) {
+				PiServer.stopServer();
+				result += "true";
+			} else {
+				Logger.log("STOP received with wrong password.");
+				result += "false";
+			}
+		else
+			result = "false";
 		exit.onExit(0);
 	}
 

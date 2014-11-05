@@ -10,6 +10,7 @@ import java.io.OutputStream;
 import java.sql.SQLException;
 import java.util.List;
 
+import net.PiSession;
 import net.packets.DataPacket;
 
 import org.apache.sshd.server.Environment;
@@ -21,27 +22,20 @@ import db.UserStatementMaker;
 
 public class DownloadCommand extends PiCommand {
 
-	private String user;
 	private String fileid;
 	public static DataPacket packet = null;
 
 	public DownloadCommand(List<String> args, InputStream in, OutputStream out,
 			OutputStream err, ExitCallback exit) {
 		super(args, in, out, err, exit);
-		user = args.get(1);
-		fileid = args.get(2);
+		fileid = args.get(1);
 		packet = null;
 	}
 
 	@Override
 	public void start(Environment env) throws IOException {
-		if (!canRun(user)) {
-			result += "false";
-			packet = null;
-			return;
-		}
 		try {
-			int uid = UserStatementMaker.getId(user);
+			int uid = UserStatementMaker.getId(PiSession.getUser());
 			boolean ownsFile = FileStatementMaker
 					.getOwnedFiles(uid)
 					.stream()

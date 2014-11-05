@@ -30,11 +30,6 @@ public class TestCommand extends PiCommand {
 	public void start(Environment env) throws IOException {
 		System.out.println("Test Command Received!");
 		result += "Test Answer";
-		try {
-			//exit.onExit(0);			
-		} catch (Exception e) {
-			Logger.logError(e);
-		}
 	}
 
 	@Override

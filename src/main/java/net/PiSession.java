@@ -122,11 +122,10 @@ public class PiSession extends Thread {
 								.encrypt(packet.getData());
 						try {
 							FileStatementMaker
-									.addDescriptor(new FileDescriptor(
-											encrypted.getName(),
-											UserStatementMaker
-													.getId(CheckUploadCommand.lastUser),
-											packet.getData().length));
+									.addDescriptor(new FileDescriptor(encrypted
+											.getName(), UserStatementMaker
+											.getId(USERNAME.get()), packet
+											.getData().length));
 						} catch (SQLException | UnknownUserException e) {
 							Logger.logError(e);
 						}
@@ -163,9 +162,9 @@ public class PiSession extends Thread {
 		USERNAME.set(user);
 	}
 
-	public static synchronized void logOut(String user) {
-		Logger.log(user + " logged out.");
-		LOGGED_IN.put(user, false);
+	public static synchronized void logOut() {
+		Logger.log(USERNAME.get() + " logged out.");
+		LOGGED_IN.put(USERNAME.get(), false);
 		USERNAME.remove();
 	}
 
@@ -186,7 +185,7 @@ public class PiSession extends Thread {
 		out.write(answer.toArray());
 	}
 
-	public static String getUser() {
+	public static synchronized String getUser() {
 		return USERNAME.get();
 	}
 }
