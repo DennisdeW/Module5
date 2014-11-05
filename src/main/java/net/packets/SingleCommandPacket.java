@@ -4,9 +4,9 @@ import global.Logger;
 
 import java.io.IOException;
 
-import ssh.command.DefaultExitCallback;
-import ssh.command.PiCommand;
-import ssh.command.PiCommand.PiCommandType;
+import net.command.DefaultExitCallback;
+import net.command.PiCommand;
+import net.command.PiCommand.PiCommandType;
 
 public class SingleCommandPacket extends CommandPacket {
 

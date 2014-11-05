@@ -16,10 +16,10 @@ import java.util.Map;
 
 import javax.net.ssl.SSLSocket;
 
+import net.command.DownloadCommand;
 import net.packets.AnswerPacket;
 import net.packets.CommandPacket;
 import net.packets.PiPacket;
-import ssh.command.DownloadCommand;
 import db.FileStatementMaker;
 import db.UnknownUserException;
 import db.UserStatementMaker;
