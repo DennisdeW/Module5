@@ -1,8 +1,9 @@
 package net.packets;
 
+import global.Logger;
+
 import java.io.IOException;
 
-import global.Logger;
 import ssh.command.CompoundCommand;
 import ssh.command.PiCommand.PiCommandType;
 

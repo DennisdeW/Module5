@@ -1,7 +1,6 @@
 package files;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.security.SecureRandom;
@@ -12,8 +11,8 @@ public class NullCrypto implements Crypto {
 	public File encrypt(byte[] bs) {
 		File f = new File(
 				"storage/"
-						+ ((((long) bs.hashCode() << 32) ^ (long) new SecureRandom()
-								.nextInt()) & 0x7FFFFFFFFFFFFFFFL));
+						+ (((long) bs.hashCode() << 32 ^ new SecureRandom()
+						.nextInt()) & 0x7FFFFFFFFFFFFFFFL));
 		FileOutputStream fos;
 		try {
 			fos = new FileOutputStream(f);

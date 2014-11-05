@@ -7,7 +7,7 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * 
+ *
  * @author Dennis (Copied from Data & Informatie project - di07)
  *
  */
@@ -18,7 +18,7 @@ public final class Tuple {
 
 	/**
 	 * Creates a new <code>Tuple</code> from the given items.
-	 * 
+	 *
 	 * @param items
 	 *            Any array of any <code>Object</code>s
 	 */
@@ -29,7 +29,7 @@ public final class Tuple {
 
 	/**
 	 * Boxes the names of primitive types
-	 * 
+	 *
 	 * @param i
 	 *            The name of an arbitrary class
 	 * @return The boxed variant of the supplied name if it exists, or the name
@@ -60,7 +60,7 @@ public final class Tuple {
 
 	/**
 	 * Returns the amount of items in this tuple.
-	 * 
+	 *
 	 * @return The amount of items in this tuple.
 	 */
 	public int getSize() {
@@ -69,7 +69,7 @@ public final class Tuple {
 
 	/**
 	 * Returns the <code>index</code>'th item in this tuple, if it exists.
-	 * 
+	 *
 	 * @param index
 	 *            The index of the desired item.
 	 * @return The item at the given index.
@@ -82,7 +82,7 @@ public final class Tuple {
 
 	/**
 	 * Gets all items in his <code>Tuple</code>.
-	 * 
+	 *
 	 * @return All items in this <code>Tuple</code>, in order.
 	 */
 	public Object[] getItems() {
@@ -92,7 +92,7 @@ public final class Tuple {
 	/**
 	 * Gets the specified range of items from this <code>Tuple</code>, if the
 	 * range is contained in the <code>Tuple</code>.
-	 * 
+	 *
 	 * @param start
 	 *            The low (inclusive) end of the desired range.
 	 * @param end
@@ -110,7 +110,7 @@ public final class Tuple {
 	/**
 	 * Determines if this <code>Tuple</code> contains elements which are exactly
 	 * the same as the supplied <code>Class</code>es.
-	 * 
+	 *
 	 * @param classes
 	 *            An arbitrary amount of <code>Class</code>es to test this tuple
 	 *            against
@@ -161,10 +161,9 @@ public final class Tuple {
 		if (t.size != size)
 			return false;
 
-		for (int i = 0; i < size; i++) {
+		for (int i = 0; i < size; i++)
 			if (!items[i].equals(t.getItem(i)))
 				return false;
-		}
 
 		return true;
 	}
@@ -177,7 +176,7 @@ public final class Tuple {
 	public String toString() {
 		String res = "[";
 		for (Object o : items)
-			res += o == null ? "null, " : (o.toString() + ", ");
+			res += o == null ? "null, " : o.toString() + ", ";
 		res = res.substring(0, res.length() - 2) + "]";
 		return res;
 	}
@@ -186,7 +185,7 @@ public final class Tuple {
 	 * Generates an array of <code>Tuple</code>s from the given
 	 * <code>ResultSet</code>.<br>
 	 * Also calls <code>DatabaseMaker.clean(ResultSet)</code>.
-	 * 
+	 *
 	 * @param in
 	 *            An untouched <code>ResultSet</code> (such that
 	 *            <code>in.isBeforeFirst()</code>)
@@ -214,7 +213,7 @@ public final class Tuple {
 	 * Makes a shallow copy of a <code>Tuple</code>. <br>
 	 * The tuple is a new instance, but any objects contained in the original
 	 * are the same.
-	 * 
+	 *
 	 * @param original
 	 *            Any <code>Tuple</code>
 	 * @return A copy of <code>original</code>

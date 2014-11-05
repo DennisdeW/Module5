@@ -1,7 +1,6 @@
 package net;
 
 import files.FileDescriptor;
-import files.NullCrypto;
 import global.Logger;
 import global.PiCloudConstants;
 
@@ -14,26 +13,26 @@ import java.net.SocketException;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Random;
 
 import javax.net.ssl.SSLSocket;
 
-import ssh.command.CheckUploadCommand;
+import net.packets.AnswerPacket;
+import net.packets.CommandPacket;
+import net.packets.PiPacket;
 import ssh.command.DownloadCommand;
 import db.FileStatementMaker;
 import db.UnknownUserException;
 import db.UserStatementMaker;
-import net.packets.AnswerPacket;
-import net.packets.CommandPacket;
-import net.packets.DataPacket;
-import net.packets.PiPacket;
 
 public class PiSession extends Thread {
 
 	private static volatile int index;
+
 	private static final Map<String, Boolean> LOGGED_IN;
 	private static final ThreadLocal<String> USERNAME = ThreadLocal
 			.withInitial(() -> "<<not logged in>>");
+	private static final ThreadLocal<Integer> INDEX = ThreadLocal
+			.withInitial(() -> -1);
 
 	static {
 		LOGGED_IN = new HashMap<>();
@@ -51,10 +50,11 @@ public class PiSession extends Thread {
 	private boolean stop;
 
 	public PiSession(PiServer piServer, SSLSocket socket) {
-		this.server = piServer;
+		server = piServer;
 		this.socket = socket;
 		index = (index + 1) % (Integer.MAX_VALUE - 1);
-		setName("Session " + index);
+		INDEX.set(index);
+		setName("Session " + index + "(" + USERNAME.get() + ")");
 		stop = false;
 	}
 
@@ -73,6 +73,7 @@ public class PiSession extends Thread {
 		}
 	}
 
+	@Override
 	public void run() {
 		Logger.log("Starting session for " + socket.getInetAddress());
 		/*
@@ -86,7 +87,7 @@ public class PiSession extends Thread {
 			Logger.logError(e1);
 			return;
 		}
-		while (!stop) {
+		while (!stop)
 			try {
 				byte[] header = new byte[6];
 				if (is.read(header) > 0) {
@@ -106,8 +107,8 @@ public class PiSession extends Thread {
 						break;
 					case COMPOUND_COMMAND:
 					case SINGLE_COMMAND:
-						Logger.log("Command packet received: "
-								+ new String(packet.getData()));
+						// Logger.log("Command packet received: "
+						// + new String(packet.getData()));
 						AnswerPacket answer = ((CommandPacket) packet).run();
 						sendPacket(answer);
 						if (DownloadCommand.packet != null) {
@@ -122,10 +123,10 @@ public class PiSession extends Thread {
 								.encrypt(packet.getData());
 						try {
 							FileStatementMaker
-									.addDescriptor(new FileDescriptor(encrypted
-											.getName(), UserStatementMaker
-											.getId(USERNAME.get()), packet
-											.getData().length));
+							.addDescriptor(new FileDescriptor(encrypted
+									.getName(), UserStatementMaker
+									.getId(USERNAME.get()), packet
+									.getData().length));
 						} catch (SQLException | UnknownUserException e) {
 							Logger.logError(e);
 						}
@@ -139,39 +140,43 @@ public class PiSession extends Thread {
 						throw new Error("Impossible");
 					}
 
-				} else {
+				} else
 					try {
 						sleep(200);
 					} catch (InterruptedException e) {
 					}
-				}
 			} catch (SocketException e) {
 				server.unregister(this);
+				logOut();
 				Logger.log("Client terminated connection.");
 				return;
 			} catch (IOException e) {
 				Logger.logError(e);
 				stopSession();
 			}
-		}
 	}
 
 	public static synchronized void logIn(String user) {
 		Logger.log(user + " logged in.");
 		LOGGED_IN.put(user, true);
 		USERNAME.set(user);
+		Thread.currentThread().setName(
+				"Session " + index + "(" + USERNAME.get() + ")");
 	}
 
 	public static synchronized void logOut() {
 		Logger.log(USERNAME.get() + " logged out.");
 		LOGGED_IN.put(USERNAME.get(), false);
 		USERNAME.remove();
+		Thread.currentThread().setName(
+				"Session " + index + "(" + USERNAME.get() + ")");
 	}
 
 	public static synchronized boolean isLoggedIn(String user) {
 		return LOGGED_IN.containsKey(user) && LOGGED_IN.get(user);
 	}
 
+	@SuppressWarnings("unused")
 	private void printPacket(byte[] raw) {
 		System.out.print("[");
 		for (byte b : raw)

@@ -6,14 +6,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.sql.SQLException;
+import java.util.Arrays;
 import java.util.List;
 
 import net.PiSession;
 
 import org.apache.sshd.server.Environment;
 import org.apache.sshd.server.ExitCallback;
-
-import java.util.Arrays;
 
 import db.UnknownUserException;
 import db.UserStatementMaker;
@@ -28,7 +27,7 @@ public class LoginCommand extends PiCommand {
 		name = args.get(1);
 		pass = args.get(2);
 	}
-	
+
 	@Override
 	public void start(Environment env) throws IOException {
 		try {
@@ -43,7 +42,7 @@ public class LoginCommand extends PiCommand {
 			Logger.logError(e);
 			result += "Error during login...";
 		}
-		
+
 	}
 
 	@Override

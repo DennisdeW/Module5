@@ -2,8 +2,6 @@ package ssh.command;
 
 import global.Logger;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -11,12 +9,10 @@ import java.sql.SQLException;
 import java.util.List;
 
 import net.PiSession;
-import net.packets.DataPacket;
 
 import org.apache.sshd.server.Environment;
 import org.apache.sshd.server.ExitCallback;
 
-import ssh.command.PiCommand.PiCommandType;
 import db.FileStatementMaker;
 import db.UnknownUserException;
 import db.UserStatementMaker;
@@ -34,20 +30,21 @@ public class CheckFileCommand extends PiCommand {
 	@Override
 	public void start(Environment env) throws IOException {
 		if (PiSession.getUser() != null)
-		try {
-			int uid = UserStatementMaker.getId(PiSession.getUser());
-			boolean ownsFile = FileStatementMaker
-					.getOwnedFiles(uid)
-					.stream()
-					.anyMatch(
-							fd -> fd.getIdentifier().equals(fileid)
-									&& fd.getOwner() == uid);
-			result += ownsFile ? "true" : "false";
-		} catch (SQLException | UnknownUserException e) {
-			result += "false";
-			Logger.logError(e);
-		}
-		else result = "false";
+			try {
+				int uid = UserStatementMaker.getId(PiSession.getUser());
+				boolean ownsFile = FileStatementMaker
+						.getOwnedFiles(uid)
+						.stream()
+						.anyMatch(
+								fd -> fd.getIdentifier().equals(fileid)
+								&& fd.getOwner() == uid);
+				result += ownsFile ? "true" : "false";
+			} catch (SQLException | UnknownUserException e) {
+				result += "false";
+				Logger.logError(e);
+			}
+		else
+			result = "false";
 	}
 
 	@Override

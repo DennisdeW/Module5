@@ -3,9 +3,9 @@ package net.packets;
 public class InvalidPacket extends PiPacket {
 
 	private int arg;
-	
+
 	public InvalidPacket(int length) {
-		arg =length;
+		arg = length;
 	}
 
 	@Override

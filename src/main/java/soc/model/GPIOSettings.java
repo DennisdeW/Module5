@@ -4,7 +4,6 @@ import java.lang.reflect.Field;
 
 import com.pi4j.io.gpio.GpioController;
 import com.pi4j.io.gpio.GpioPinDigitalInput;
-import com.pi4j.io.gpio.GpioPinDigitalMultipurpose;
 import com.pi4j.io.gpio.GpioPinDigitalOutput;
 import com.pi4j.io.gpio.Pin;
 import com.pi4j.io.gpio.PinMode;
@@ -196,6 +195,7 @@ public class GPIOSettings {
 	 * @param setting the default pin settings (high or low)
 	 * @return the pin
 	 */	
+	@SuppressWarnings("unused")
 	private synchronized final GpioPinDigitalOutput getOutPin(GpioController gpio, int pinNr, PinState setting) {
 		try {
 			return gpio.provisionDigitalOutputPin((Pin)getPinField(pinNr).get(null), setting);
@@ -210,6 +210,7 @@ public class GPIOSettings {
 	 * @param pinNr the number of the pin
 	 * @return the pin
 	 */		
+	@SuppressWarnings("unused")
 	private synchronized final GpioPinDigitalInput getInPin(GpioController gpio, int pinNr) {
 		try {
 			return gpio.provisionDigitalInputPin((Pin)getPinField(pinNr).get(null));
@@ -225,6 +226,7 @@ public class GPIOSettings {
 	 * @param setting the default pin setting
 	 * @return the pin
 	 */
+	@SuppressWarnings("unused")
 	private synchronized final GpioPinDigitalInput getInPin(GpioController gpio, int pinNr, PinPullResistance setting) {
 		try {
 			return gpio.provisionDigitalInputPin((Pin)getPinField(pinNr).get(null), setting);

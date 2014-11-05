@@ -14,7 +14,7 @@ import db.UserStatementMaker;
 public class CheckUserCommand extends PiCommand {
 
 	private String name;
-	
+
 	public CheckUserCommand(List<String> args, InputStream in,
 			OutputStream out, OutputStream err, ExitCallback exit) {
 		super(args, in, out, err, exit);
@@ -25,7 +25,7 @@ public class CheckUserCommand extends PiCommand {
 	public void start(Environment env) throws IOException {
 		try {
 			boolean res = UserStatementMaker.accountExists(name);
-			result += res+"";
+			result += res + "";
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}

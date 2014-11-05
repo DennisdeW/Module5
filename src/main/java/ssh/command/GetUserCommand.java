@@ -8,23 +8,25 @@ import java.util.List;
 import org.apache.sshd.server.Environment;
 import org.apache.sshd.server.ExitCallback;
 
-import db.UserStatementMaker;
-
 /**
- * Debug command to get a user's id number. The number will be printed in the console.
+ * Debug command to get a user's id number. The number will be printed in the
+ * console.
+ *
  * @author Dennis
  *
  */
 public class GetUserCommand extends PiCommand {
-	
+
 	/**
 	 * Needs a single argument: A user name.
-	 * @param args A list containing the sole argument. 
+	 *
+	 * @param args
+	 *            A list containing the sole argument.
 	 */
 	public GetUserCommand(List<String> args) {
 		super(args);
 	}
-	
+
 	public GetUserCommand(List<String> args, InputStream in, OutputStream out,
 			OutputStream err, ExitCallback exit) {
 		super(args, in, out, err, exit);

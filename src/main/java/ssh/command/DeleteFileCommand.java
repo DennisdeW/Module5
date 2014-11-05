@@ -1,8 +1,6 @@
 package ssh.command;
 
-import files.FileDescriptor;
-import global.Logger;
-
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -18,6 +16,8 @@ import org.apache.sshd.server.ExitCallback;
 import db.FileStatementMaker;
 import db.UnknownUserException;
 import db.UserStatementMaker;
+import files.FileDescriptor;
+import global.Logger;
 
 public class DeleteFileCommand extends PiCommand {
 
@@ -34,16 +34,20 @@ public class DeleteFileCommand extends PiCommand {
 		try {
 			int uid = UserStatementMaker.getId(PiSession.getUser());
 			Set<FileDescriptor> owned = FileStatementMaker.getOwnedFiles(uid);
-			FileDescriptor target = owned
-					.stream()
-					.filter(fd -> fd.getIdentifier()
-							.equals(filename.getBytes())).findFirst()
-					.orElse(null);
+			FileDescriptor target = owned.stream()
+					.filter(fd -> fd.getIdentifier().equals(filename))
+					.findFirst().orElse(null);
 			if (target == null) {
 				result = "false";
 				return;
 			}
-			result = FileStatementMaker.deleteDescriptor(target) ? "true" : "false";
+			File toDelete = new File("storage/" + target.getIdentifier());
+			if (!toDelete.canRead()) {
+				result = "false";
+				return;
+			}
+			result = FileStatementMaker.deleteDescriptor(target)
+					&& toDelete.delete() ? "true" : "false";
 		} catch (SQLException | UnknownUserException e) {
 			Logger.logError(e);
 			result = "false";

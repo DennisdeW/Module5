@@ -41,7 +41,7 @@ public class DownloadCommand extends PiCommand {
 					.stream()
 					.anyMatch(
 							fd -> fd.getIdentifier().equals(fileid)
-									&& fd.getOwner() == uid);
+							&& fd.getOwner() == uid);
 			if (ownsFile) {
 				File target = new File("storage/" + fileid);
 				FileInputStream fis = new FileInputStream(target);

@@ -13,11 +13,9 @@ import net.PiSession;
 import org.apache.sshd.server.Environment;
 import org.apache.sshd.server.ExitCallback;
 
-import ssh.SSHManager;
-
 /**
  * Command to stop the server.
- * 
+ *
  * @author Dennis
  *
  */

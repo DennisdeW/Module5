@@ -10,6 +10,7 @@ import org.apache.sshd.server.ExitCallback;
 
 /**
  * Dummy command to avoid crashes when an unkown command is sent.
+ *
  * @author Dennis
  *
  */
@@ -18,7 +19,7 @@ public class DummyCommand extends PiCommand {
 	public DummyCommand(List<String> args) {
 		super(args);
 	}
-	
+
 	public DummyCommand(List<String> args, InputStream in, OutputStream out,
 			OutputStream err, ExitCallback exit) {
 		super(args, in, out, err, exit);
@@ -31,7 +32,7 @@ public class DummyCommand extends PiCommand {
 
 	@Override
 	public void destroy() {
-		
+
 	}
 
 	@Override

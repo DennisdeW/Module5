@@ -13,12 +13,9 @@ import net.PiSession;
 import org.apache.sshd.server.Command;
 import org.apache.sshd.server.ExitCallback;
 
-import ssh.SSHManager;
-import ssh.command.sftp.SFTPCommand;
-
 /**
  * Base class for commands.
- * 
+ *
  * @author Dennis
  *
  */
@@ -53,7 +50,7 @@ public abstract class PiCommand implements Command {
 		this.out = out;
 		this.err = err;
 		this.exit = exit;
-		this.result = "";
+		result = "";
 	}
 
 	public abstract PiCommandType getType();
@@ -75,27 +72,26 @@ public abstract class PiCommand implements Command {
 
 	@Override
 	public void setExitCallback(ExitCallback callback) {
-		this.exit = callback;
+		exit = callback;
 	}
 
 	/**
 	 * Enum which contains all implemented commands.
-	 * 
+	 *
 	 * @author Dennis
 	 *
 	 */
 	public enum PiCommandType {
 		TEST("test", TestCommand.class), GET_USER("user", GetUserCommand.class), CREATE_USER(
 				"create", CreateUserCommand.class), STOP("stop",
-				StopCommand.class), DECRYPT("decrypt", DecryptCommand.class), DUMMY(
-				"", DummyCommand.class), CHECK_USER("checkUser",
-				CheckUserCommand.class), DELETE_USER("deleteUser",
-				DeleteUserCommand.class), LOGIN("login", LoginCommand.class), LOGOUT(
-				"logout", LogoutCommand.class), CHECK_UPLOAD("upload",
-				CheckUploadCommand.class), DOWNLOAD("download",
-				DownloadCommand.class), CHECK_FILE("checkFile",
-				CheckFileCommand.class), DELETE_FILE("deleteFile",
-				DeleteFileCommand.class);
+						StopCommand.class), DUMMY("", DummyCommand.class), CHECK_USER(
+								"checkUser", CheckUserCommand.class), DELETE_USER("deleteUser",
+										DeleteUserCommand.class), LOGIN("login", LoginCommand.class), LOGOUT(
+												"logout", LogoutCommand.class), CHECK_UPLOAD("upload",
+														CheckUploadCommand.class), DOWNLOAD("download",
+																DownloadCommand.class), CHECK_FILE("checkFile",
+																		CheckFileCommand.class), DELETE_FILE("deleteFile",
+																				DeleteFileCommand.class);
 
 		private String command;
 		private Class<? extends PiCommand> clazz;
@@ -132,7 +128,7 @@ public abstract class PiCommand implements Command {
 				comm = clazz.getConstructor(List.class, InputStream.class,
 						OutputStream.class, OutputStream.class,
 						ExitCallback.class).newInstance(
-						Arrays.asList(args.split("-")), in, out, err, exit);
+								Arrays.asList(args.split("-")), in, out, err, exit);
 			} catch (InstantiationException | IllegalAccessException
 					| IllegalArgumentException | InvocationTargetException
 					| NoSuchMethodException | SecurityException e2) {
@@ -145,7 +141,7 @@ public abstract class PiCommand implements Command {
 
 		/**
 		 * Get the enum constant backing the given command string.
-		 * 
+		 *
 		 * @param command
 		 *            The command to search for, <b>without arguments</b>
 		 * @return The enum constant which has the class for this command, or
@@ -163,7 +159,7 @@ public abstract class PiCommand implements Command {
 		 * Gets the command which is bound to the given string.<br>
 		 * Commands should be structured as follows:<br>
 		 * <i>command-arg1-arg2-...-argN</i>
-		 * 
+		 *
 		 * @param command
 		 *            The command with arguments, as above.
 		 * @return The command, supplied with the arguments.
@@ -174,12 +170,7 @@ public abstract class PiCommand implements Command {
 				Logger.log("Received Create User Command: "
 						+ command.split("-")[1]);
 			else
-				Logger.log("Received Command: " + command + " (sender=" + /*
-																		 * SSHManager
-																		 * .
-																		 * username
-																		 * +
-																		 */")");
+				Logger.log("Received Command: " + command);
 			PiCommandType type = null;
 			try {
 				type = typeOf(command.split("-")[0]);
@@ -202,8 +193,7 @@ public abstract class PiCommand implements Command {
 				Logger.log("Received Login Command for "
 						+ command.split("-")[1]);
 			else
-				Logger.log("Received Command: " + command + " (sender="
-				/* + SSHManager.username */+ ")");
+				Logger.log("Received Command: " + command);
 			PiCommandType type = null;
 			try {
 				type = typeOf(command.split("-")[0]);

@@ -18,7 +18,7 @@ import org.apache.sshd.server.ExitCallback;
 public class CompoundCommand extends PiCommand {
 
 	private List<PiCommand> commands;
-	
+
 	public CompoundCommand(List<PiCommand> args) {
 		super(new ArrayList<String>());
 		commands = args;
@@ -33,7 +33,8 @@ public class CompoundCommand extends PiCommand {
 	@Override
 	public void start(Environment env) throws IOException {
 		PiCommand.terminateSession = false;
-		Thread.currentThread().setName("CompoundCommand-" + new Random().nextInt(10));
+		Thread.currentThread().setName(
+				"CompoundCommand-" + new Random().nextInt(10));
 		Logger.log("Running CompoundCommand with " + commands);
 		for (PiCommand pic : commands) {
 			Logger.log("Running command: " + pic);
@@ -41,7 +42,7 @@ public class CompoundCommand extends PiCommand {
 			result += pic.result;
 		}
 		PiCommand.terminateSession = true;
-		
+
 	}
 
 	@Override
