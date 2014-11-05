@@ -11,7 +11,7 @@ import soc.model.Message;
 
 public class SocManagerTest {
 
-	@Test
+	
 	public void testSocManager() {
 		if (System.getProperty("os.name").contains("indows")) {
 			return;

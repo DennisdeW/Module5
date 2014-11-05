@@ -5,8 +5,12 @@ import global.Logger;
 import global.Timer;
 import global.Tools;
 
+import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.security.SecureRandom;
 import java.util.Arrays;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -29,7 +33,10 @@ public class SocManager implements Crypto {
     
 	private static final int DEFAULT_CONNECTION_SPEED = 32000000;
 	private static final int DEFAULT_BUFFER_SIZE = 1000;
-
+	private static final int DEFAULT_TIMEOUT = 2000;
+	
+	private SecureRandom secure;
+	
 	public static SocManager instance;
 	
 	private static ReentrantLock lock;
@@ -68,6 +75,7 @@ public class SocManager implements Crypto {
 			GPIO = GpioFactory.getInstance();
 		}
 		this.settings = settings;
+		secure = new SecureRandom();
 	}
 
 	/**
@@ -88,6 +96,32 @@ public class SocManager implements Crypto {
 		this.settings = settings;
 	}
 	
+	@Override
+	public File decrypt(byte[] cipher) {
+		Message msg = new Message(cipher);
+		Message plain = msg;//sendAndReceiveData(msg, false, 2000);
+		File file = new File("storage/" + (secure.nextLong() & 0x7FFFFFFFFFFFFFFFL));
+		try (BufferedOutputStream out = new BufferedOutputStream(new FileOutputStream(file))) {
+			out.write(plain.getData());
+		} catch (IOException e) {
+			Logger.logError(e);
+		}
+		return file;
+	}
+
+	@Override
+	public File encrypt(byte[] plain) {
+		Message msg = new Message(plain);
+		Message cipher = msg;//sendAndReceiveData(msg, true, 2000);
+		File file = new File("storage/" + (secure.nextLong() & 0x7FFFFFFFFFFFFFFFL));
+		try (BufferedOutputStream out = new BufferedOutputStream(new FileOutputStream(file))) {
+			out.write(cipher.getData());
+		} catch (IOException e) {
+			Logger.logError(e);
+		}
+		return file;
+	}
+	
 	/**
 	 * Sends the data to the DE1 SoC for encryption/decryption.
 	 * 
@@ -98,17 +132,6 @@ public class SocManager implements Crypto {
 	 */
 	public synchronized Message sendAndReceiveData(Message msg, boolean encrypt, long timeout) {
 		return sendAndReceiveData(msg, encrypt, timeout, false);
-	}
-	
-	@Override
-	public File encrypt(File plain) {
-		return null;
-	}
-
-	@Override
-	public File decrypt(File cipher) {
-		// TODO Auto-generated method stub
-		return null;
 	}
 
 	/**
@@ -310,18 +333,6 @@ public class SocManager implements Crypto {
 	public static void init() {
 		GPIOSettings settings = new GPIOSettings();
 		instance = new SocManager(settings, DEFAULT_CONNECTION_SPEED, DEFAULT_BUFFER_SIZE);
-	}
-
-	@Override
-	public File decrypt(byte[] cipher) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public File encrypt(byte[] plain) {
-		// TODO Auto-generated method stub
-		return null;
 	}
 
 }
