@@ -100,7 +100,16 @@ public class SocManager implements Crypto {
 		return sendAndReceiveData(msg, encrypt, timeout, false);
 	}
 	
-	
+	@Override
+	public File encrypt(File plain) {
+		return null;
+	}
+
+	@Override
+	public File decrypt(File cipher) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 
 	/**
 	 * Sends the data to the DE1 SoC for encryption/decryption or sends to
@@ -146,7 +155,11 @@ public class SocManager implements Crypto {
 			} catch (ArrayIndexOutOfBoundsException e) {				
 				Logger.logError(e);
 			}
-			System.out.println("Send data (" + i + " to " + (i + maxBuff) + "): " + Arrays.toString(buffer));
+			System.out.print("Send data (" + i + " to " + (i + maxBuff) + "): [");
+			for (byte b : buffer) {
+				System.out.print((Integer.toBinaryString((int)b & 0xFF)) + ", ");			
+			}	
+			System.out.println("]");
 			// try to send data
 			boolean sendSuccesfull = true;
 			if (Spi.wiringPiSPIDataRW(0, buffer, maxBuff) == -1) {
@@ -162,7 +175,11 @@ public class SocManager implements Crypto {
 				// check for response from DE1
 				if (!Tools.allEqualTo(buffer, (byte)0) && (selfSending || settings.getDe1ActivePin(GPIO).isHigh())) {
 					System.out.println("Selfs: " + selfSending);
-					System.out.println("Got data (" + readIndex + " to " + (readIndex + maxBuff) + "): " + Arrays.toString(buffer));
+					System.out.print("Got data (" + readIndex + " to " + (readIndex + maxBuff) + "): [");
+					for (byte b : buffer) {
+						System.out.print((Integer.toBinaryString((int)b & 0xFF)) + ", ");			
+					}
+					System.out.println("]");
 					System.arraycopy(buffer, 0, receivedBytes, i, maxBuff);
 					readIndex += maxBuff;
 					timer.restart();
@@ -192,7 +209,11 @@ public class SocManager implements Crypto {
 			// check for response from DE1
 			if (!Tools.allEqualTo(buffer, (byte)0) && (selfSending || settings.getDe1ActivePin(GPIO).isHigh())) {
 				System.out.println("success 2");
-				System.out.println("Got data late (" + readIndex + " to " + (readIndex + maxBuff) + "): " + Arrays.toString(buffer));
+				System.out.print("Got data late (" + readIndex + " to " + (readIndex + maxBuff) + "): [");
+				for (byte b : buffer) {
+					System.out.print((Integer.toBinaryString((int)b & 0xFF)) + ", ");			
+				}
+				System.out.println("]");
 				System.arraycopy(buffer, 0, receivedBytes, readIndex, maxBuff);
 				readIndex += maxBuff;
 				timer.restart();
@@ -281,7 +302,7 @@ public class SocManager implements Crypto {
 		int packetSize = args.length > 1 ? Integer.parseInt(args[1]) : 16;
 		int fileSize = args.length > 2 ? Integer.parseInt(args[2]) : 1000;
 		int bufferSize = args.length > 3 ? Integer.parseInt(args[3]) : 1000;
-		int timeOut = args.length > 4 ? Integer.parseInt(args[4]) : 1000;
+		int timeOut = args.length > 4 ? Integer.parseInt(args[4]) : 2000;
 		boolean selfTest = args.length > 5 ? Boolean.parseBoolean(args[5]) : false;
 		SocManagerTest.testSocManager(sendSpeed, packetSize, fileSize, bufferSize, timeOut, selfTest);
 	}
