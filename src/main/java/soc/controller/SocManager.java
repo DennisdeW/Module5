@@ -7,7 +7,6 @@ import global.Tools;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.security.SecureRandom;
@@ -22,11 +21,6 @@ import com.pi4j.io.gpio.GpioFactory;
 import com.pi4j.io.gpio.GpioPinDigitalInput;
 import com.pi4j.wiringpi.Spi;
 
-import files.Crypto;
-import global.Logger;
-import global.Timer;
-import global.Tools;
-
 /**
  * Represents the connection between the Pi and the DE1 SoC.<br>
  * It can be used to encrypt or decrypt data and in the future also for
@@ -38,6 +32,7 @@ public class SocManager implements Crypto {
 
 	private static final int DEFAULT_CONNECTION_SPEED = 32000000;
 	private static final int DEFAULT_BUFFER_SIZE = 1000;
+	@SuppressWarnings("unused")
 	private static final int DEFAULT_TIMEOUT = 2000;
 	
 	private SecureRandom secure;
@@ -82,6 +77,9 @@ public class SocManager implements Crypto {
 		}
 		this.settings = settings;
 		secure = new SecureRandom();
+	}
+
+	public SocManager() {
 	}
 
 	/**
