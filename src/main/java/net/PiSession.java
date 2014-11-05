@@ -94,11 +94,14 @@ public class PiSession extends Thread {
 					int datalen = PiPacket.getPacketLength(header);
 					byte[] raw = new byte[6 + datalen];
 					System.arraycopy(header, 0, raw, 0, 6);
-					int i = 6;
-					while (i < datalen
-							&& (i += is.read(raw, i, datalen + 6 - i)) != -1) {
-					}
-					// System.out.println(is.read(raw, 6, datalen));
+					if (datalen <= 6) {
+						is.read(raw, 6, datalen);
+					} else {
+						int i = 6;
+						while (i < datalen
+								&& (i += is.read(raw, i, datalen + 6 - i)) != -1)
+							;
+					}// System.out.println(is.read(raw, 6, datalen));
 					PiPacket packet = PiPacket.readPacket(raw);
 					switch (packet.getType()) {
 					case ANSWER:
@@ -123,10 +126,10 @@ public class PiSession extends Thread {
 								.encrypt(packet.getData());
 						try {
 							FileStatementMaker
-							.addDescriptor(new FileDescriptor(encrypted
-									.getName(), UserStatementMaker
-									.getId(USERNAME.get()), packet
-									.getData().length));
+									.addDescriptor(new FileDescriptor(encrypted
+											.getName(), UserStatementMaker
+											.getId(USERNAME.get()), packet
+											.getData().length));
 						} catch (SQLException | UnknownUserException e) {
 							Logger.logError(e);
 						}

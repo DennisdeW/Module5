@@ -152,6 +152,7 @@ public abstract class PiCommand implements Command {
 				if (type.command.equalsIgnoreCase(command))
 					return type;
 			Logger.logError("Unrecognized command: " + command);
+			Logger.logError(Arrays.toString(command.getBytes()));
 			return DUMMY;
 		}
 

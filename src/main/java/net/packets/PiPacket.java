@@ -1,5 +1,7 @@
 package net.packets;
 
+import global.Logger;
+
 import java.util.Arrays;
 
 public abstract class PiPacket {
