@@ -13,6 +13,10 @@ import javax.net.ssl.SSLServerSocket;
 import javax.net.ssl.SSLServerSocketFactory;
 import javax.net.ssl.SSLSocket;
 
+import com.sun.jna.Platform;
+
+import soc.controller.SocManager;
+
 public class PiServer extends Thread {
 	public static final SSLServerSocket SOCKET;
 	private static PiServer instance;
@@ -25,6 +29,8 @@ public class PiServer extends Thread {
 		System.setProperty("javax.net.ssl.keyStore", "keystore");
 		System.setProperty("javax.net.ssl.keyStorePassword", "picloudkeypass");
 		Logger.init();
+		if (Platform.isLinux())
+			SocManager.init();
 		File storage = new File("storage"), temp = new File("temp");
 		if (!storage.isDirectory())
 			storage.mkdir();
