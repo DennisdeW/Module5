@@ -3,13 +3,13 @@ package net.packets;
 public abstract class CommandPacket extends PiPacket {
 
 	private final int size;
-	
+
 	protected CommandPacket(int size) {
 		this.size = size;
 	}
-	
+
 	public abstract AnswerPacket run();
-	
+
 	@Override
 	public byte[] toArray() {
 		byte[] header = getHeader(size);
@@ -19,5 +19,5 @@ public abstract class CommandPacket extends PiPacket {
 		System.arraycopy(command, 0, packet, header.length, command.length);
 		return packet;
 	}
-	
+
 }

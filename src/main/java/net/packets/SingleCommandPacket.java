@@ -4,9 +4,9 @@ import global.Logger;
 
 import java.io.IOException;
 
-import ssh.DefaultExitCallback;
-import ssh.command.PiCommand;
-import ssh.command.PiCommand.PiCommandType;
+import net.command.DefaultExitCallback;
+import net.command.PiCommand;
+import net.command.PiCommand.PiCommandType;
 
 public class SingleCommandPacket extends CommandPacket {
 
@@ -18,9 +18,9 @@ public class SingleCommandPacket extends CommandPacket {
 		int commandLength = data.length;
 		byte[] command = new byte[commandLength];
 		System.arraycopy(data, 0, command, 0, data.length);
-		this.commandString = new String(command);
-		this.command = PiCommandType.getCommand(commandString.substring(6), null, null,
-				null, new DefaultExitCallback());
+		commandString = new String(command);
+		this.command = PiCommandType.getCommand(commandString.substring(6),
+				null, null, null, new DefaultExitCallback());
 	}
 
 	@Override
@@ -53,7 +53,7 @@ public class SingleCommandPacket extends CommandPacket {
 	public String toString() {
 		return "[SC|" + commandString + "]";
 	}
-	
+
 	public static SingleCommandPacket create(String command) {
 		return new SingleCommandPacket(command.getBytes());
 	}

@@ -61,7 +61,7 @@ public final class Logger implements Thread.UncaughtExceptionHandler {
 	}
 
 	public static synchronized void logError(Throwable t) {
-		logError(getStackTraceString((t)));
+		logError(getStackTraceString(t));
 	}
 
 	private static String getPrefix() {

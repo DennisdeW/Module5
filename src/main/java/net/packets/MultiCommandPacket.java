@@ -1,10 +1,11 @@
 package net.packets;
 
+import global.Logger;
+
 import java.io.IOException;
 
-import global.Logger;
-import ssh.command.CompoundCommand;
-import ssh.command.PiCommand.PiCommandType;
+import net.command.CompoundCommand;
+import net.command.PiCommand.PiCommandType;
 
 public class MultiCommandPacket extends CommandPacket {
 

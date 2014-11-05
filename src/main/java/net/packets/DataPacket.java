@@ -10,12 +10,12 @@ import org.bouncycastle.util.Arrays;
 public class DataPacket extends PiPacket {
 
 	private final byte[] file;
-	
+
 	DataPacket(byte[] data) {
 		file = new byte[data.length - 6];
 		System.arraycopy(data, 6, file, 0, file.length);
 	}
-	
+
 	@Override
 	public byte[] toArray() {
 		byte[] header = getHeader(file.length);
@@ -34,7 +34,7 @@ public class DataPacket extends PiPacket {
 	public PiPacketType getType() {
 		return PiPacketType.FILE;
 	}
-	
+
 	public File saveToFile(String path) throws IOException {
 		File file = new File(path);
 		file.createNewFile();
@@ -43,7 +43,7 @@ public class DataPacket extends PiPacket {
 		fos.close();
 		return file;
 	}
-	
+
 	public static DataPacket fromFile(File source) throws IOException {
 		if (!source.canRead())
 			throw new IOException("Can't read source file!");

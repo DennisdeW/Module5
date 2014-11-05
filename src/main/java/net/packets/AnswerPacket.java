@@ -36,7 +36,7 @@ public class AnswerPacket extends PiPacket {
 	public String toString() {
 		return "[A|" + message + "]";
 	}
-	
+
 	public static AnswerPacket getPacket(String message) {
 		return new AnswerPacket(message);
 	}

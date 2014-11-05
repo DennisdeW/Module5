@@ -2,8 +2,6 @@ package db;
 
 import global.Logger;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Method;
@@ -13,7 +11,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -28,7 +25,7 @@ import com.sun.jna.NativeLibrary;
 import com.sun.jna.Platform;
 
 /**
- * 
+ *
  * @author Dennis (Partly copied from Data & Informatie project - di07)
  *
  */
@@ -53,11 +50,12 @@ public class DatabaseManager {
 			Properties props = new Properties();
 			props.setProperty("user", "postgres");
 			props.setProperty("password", "piCloud");
-			if (Platform.isLinux()) {
-				t = DriverManager.getConnection("jdbc:postgresql://localhost/picloud", props);
-			} else {
-				t = DriverManager.getConnection("jdbc:postgresql://localhost/piCloud", props);
-			}
+			if (Platform.isLinux())
+				t = DriverManager.getConnection(
+						"jdbc:postgresql://localhost/picloud", props);
+			else
+				t = DriverManager.getConnection(
+						"jdbc:postgresql://localhost/piCloud", props);
 		} catch (ClassNotFoundException | SQLException e) {
 			e.printStackTrace();
 			System.exit(1);
@@ -70,7 +68,7 @@ public class DatabaseManager {
 
 	/**
 	 * Ensures a ResultSet is closed properly
-	 * 
+	 *
 	 * @param result
 	 *            The ResultSet to close
 	 * @throws SQLException
@@ -82,10 +80,9 @@ public class DatabaseManager {
 		WeakReference<PreparedStatement> ref = activeResults.get(result);
 		boolean removeStatement = true;
 		for (Entry<ResultSet, WeakReference<PreparedStatement>> ent : activeResults
-				.entrySet()) {
+				.entrySet())
 			if (!ent.getKey().equals(result) && ent.getValue().equals(ref))
 				removeStatement = false;
-		}
 
 		result.close();
 		if (removeStatement) {
@@ -99,12 +96,12 @@ public class DatabaseManager {
 	public static void init() {
 		Logger.log("Starting DatabaseManager...");
 	}
-	
+
 	/**
 	 * Closes the provided PreparedStatement.<br>
 	 * Usage of this method is very risky, since any active ResultSets will
 	 * become invalid.
-	 * 
+	 *
 	 * @param statement
 	 * @throws SQLException
 	 *             If the <code>PreparedStatement</code> is already closed.
@@ -120,15 +117,15 @@ public class DatabaseManager {
 	public static void main(String[] args) throws SQLException, IOException {
 		Logger.init();
 		init();
-		//byte[] buf = new byte[65536];
-		//PasswordGetter.INSTANCE.getKey(buf);
-		//File file = new File("key.bin");
-		//FileInputStream fos = new FileInputStream(file);
-		//byte[] key = new byte[65536];
-		//fos.read(key);
-		//fos.close();
-		//Logger.log("Keys match: " + Arrays.equals(buf, key));
-		
+		// byte[] buf = new byte[65536];
+		// PasswordGetter.INSTANCE.getKey(buf);
+		// File file = new File("key.bin");
+		// FileInputStream fos = new FileInputStream(file);
+		// byte[] key = new byte[65536];
+		// fos.read(key);
+		// fos.close();
+		// Logger.log("Keys match: " + Arrays.equals(buf, key));
+
 		Statement s = DB_CONN.createStatement();
 		ResultSet r = s.executeQuery("SELECT * FROM \"Users\";");
 		r.next();
@@ -165,11 +162,12 @@ public class DatabaseManager {
 	static PreparedStatement prepare(String sql) throws SQLException {
 		return DB_CONN.prepareStatement(sql);
 	}
-	
+
 	/**
 	 * Closes Remaining Connections
 	 */
 	private static final class CleanupThread extends Thread {
+		@Override
 		public void run() {
 			setName("DB Cleanup");
 			Logger.log("Running Cleanup...");
@@ -185,24 +183,27 @@ public class DatabaseManager {
 		}
 	}
 
+	@SuppressWarnings("unused")
 	private static interface PasswordGetter extends Library {
 		PasswordGetter INSTANCE = (PasswordGetter) Native.loadLibrary(Platform
 				.isWindows() ? "PiCloudKeyStore.dll" : "PiCloudKeyStore.so",
-				PasswordGetter.class, new HashMap<String, Object>() {
-					private static final long serialVersionUID = 1L;
-					{
-						put(Library.OPTION_FUNCTION_MAPPER, new Mapper());
-					}
-				});
+						PasswordGetter.class, new HashMap<String, Object>() {
+			private static final long serialVersionUID = 1L;
+			{
+				put(Library.OPTION_FUNCTION_MAPPER, new Mapper());
+			}
+		});
 
 		/**
 		 * Gets a random key.
+		 *
 		 * @param buf
 		 */
 		public void generateKey(byte[] buf);
 
 		/**
 		 * Gets the correct 64kiB key, to test against a supplied key file.
+		 *
 		 * @param buf
 		 */
 		public void getKey(byte[] buf);

@@ -14,7 +14,7 @@ public class UserStatementMaker {
 
 	/**
 	 * Gets the ID of a user with the given name.
-	 * 
+	 *
 	 * @param name
 	 *            The name to find the id for
 	 * @return The id corresponding to the name
@@ -24,7 +24,7 @@ public class UserStatementMaker {
 	 *             If there is no user with this name
 	 */
 	public static int getId(String name) throws SQLException,
-			UnknownUserException {
+	UnknownUserException {
 		PreparedStatement statement = DatabaseManager
 				.prepare("SELECT id FROM \"Users\" WHERE \"name\" = ?;");
 		statement.setString(1, name);
@@ -40,7 +40,7 @@ public class UserStatementMaker {
 	 * Gets all data information about the user corresponding to id.<br>
 	 * <b>Do not forget to call DatabaseManager.clean() on the result!</b>
 	 * Tuple.fromResultSet() will also do this.
-	 * 
+	 *
 	 * @param id
 	 *            The user's id
 	 * @return A ResultSet containing the result of the query <i>SELECT * FROM
@@ -59,7 +59,7 @@ public class UserStatementMaker {
 
 	/**
 	 * Gets the (salted and hashed) password corresponing to the given id.
-	 * 
+	 *
 	 * @param id
 	 *            A user's id.
 	 * @return The salted and hashed password belonging to the user.
@@ -69,7 +69,7 @@ public class UserStatementMaker {
 	 *             If there is no user with this id
 	 */
 	public static byte[] getPass(int id) throws SQLException,
-			UnknownUserException {
+	UnknownUserException {
 		PreparedStatement statement = DatabaseManager
 				.prepare("SELECT \"pass\" FROM \"Users\" WHERE \"id\" = ?;");
 		statement.setInt(1, id);
@@ -83,7 +83,7 @@ public class UserStatementMaker {
 
 	/**
 	 * Salts and hashes the given password with the salt corresponding to id.
-	 * 
+	 *
 	 * @param id
 	 *            The user's id
 	 * @param pass
@@ -95,7 +95,7 @@ public class UserStatementMaker {
 	 *             If there is no user with this id
 	 */
 	public static byte[] saltPass(int id, byte[] pass) throws SQLException,
-			UnknownUserException {
+	UnknownUserException {
 		PreparedStatement statement = DatabaseManager
 				.prepare("SELECT \"salt\" FROM \"Users\" WHERE \"id\" = ?;");
 		statement.setInt(1, id);
@@ -115,7 +115,7 @@ public class UserStatementMaker {
 	/**
 	 * Convenience method to get a password:
 	 * <code>return getPass(getId(name));</code>
-	 * 
+	 *
 	 * @param name
 	 *            The user's name.
 	 * @return The user's (salted and hashed) password
@@ -126,13 +126,13 @@ public class UserStatementMaker {
 	 *             improper result
 	 */
 	public static byte[] getPass(String name) throws SQLException,
-			UnknownUserException {
+	UnknownUserException {
 		return getPass(getId(name));
 	}
 
 	/**
 	 * Deletes the account with this id
-	 * 
+	 *
 	 * @param id
 	 *            The id of the user to delete
 	 * @return
@@ -199,9 +199,8 @@ public class UserStatementMaker {
 		DatabaseManager.registerResult(result, statement);
 		Tuple[] tuples = Tuple.fromResultSet(result);
 		List<String> names = new ArrayList<>();
-		for (Tuple t : tuples) {
+		for (Tuple t : tuples)
 			names.add((String) t.getItem(0));
-		}
 		return names;
 	}
 

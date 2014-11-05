@@ -4,7 +4,7 @@ import java.util.Arrays;
 
 public abstract class PiPacket {
 
-	public static final byte[] MAGIC = new byte[]{80, 73};
+	public static final byte[] MAGIC = new byte[] { 80, 73 };
 
 	public abstract byte[] toArray();
 
@@ -12,16 +12,17 @@ public abstract class PiPacket {
 
 	public abstract PiPacketType getType();
 
+	@Override
 	public abstract String toString();
 
 	protected byte[] getHeader(int length) {
 		byte[] res = new byte[6];
 		System.arraycopy(MAGIC, 0, res, 0, 2);
-		res[2] = (byte) ((length >> 24) & 0x3F); // Clear two most significant
-													// bits
-		res[2] |= ((int) getType().getId() & 0xFF) << 6;
-		res[3] = (byte) ((length >> 16) & 0xFF);
-		res[4] = (byte) ((length >> 8) & 0xFF);
+		res[2] = (byte) (length >> 24 & 0x3F); // Clear two most significant
+												// bits
+		res[2] |= (getType().getId() & 0xFF) << 6;
+		res[3] = (byte) (length >> 16 & 0xFF);
+		res[4] = (byte) (length >> 8 & 0xFF);
 		res[5] = (byte) (length & 0xFF);
 		return res;
 	}
@@ -38,19 +39,19 @@ public abstract class PiPacket {
 		System.arraycopy(header, 2, relevant, 0, 4);
 		int length = relevant[0] & 0x3F;
 		length <<= 8;
-		length += ((int) relevant[1] & 0xFF);
+		length += relevant[1] & 0xFF;
 		length <<= 8;
-		length += ((int) relevant[2] & 0xFF);
+		length += relevant[2] & 0xFF;
 		length <<= 8;
-		length += ((int) relevant[3] & 0xFF);
+		length += relevant[3] & 0xFF;
 		return length;
 	}
 
 	public static PiPacket readPacket(byte[] data) {
 		PiPacketType type = getType(data);
-		if (Arrays.equals(new byte[]{data[0], data[1]}, MAGIC))
-			
-		return type.getPacket(data);
+		if (Arrays.equals(new byte[] { data[0], data[1] }, MAGIC))
+
+			return type.getPacket(data);
 		return new InvalidPacket(data.length);
 	}
 

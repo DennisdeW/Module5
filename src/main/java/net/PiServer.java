@@ -49,6 +49,7 @@ public class PiServer extends Thread {
 		Logger.log("Socket created.");
 	}
 
+	@Override
 	public void run() {
 		Logger.log("Starting server loop.");
 		while (!stop) {

@@ -29,7 +29,7 @@ public class FileMessage {
 	public File getFile() {
 		return file;
 	}
-	
+
 	public int getId() {
 		return id;
 	}
@@ -37,12 +37,14 @@ public class FileMessage {
 	// Note: msg is explicitly not part of equals and hashCode, as one file has
 	// both an encrypted and a decrypted form.
 
+	@Override
 	public boolean equals(Object o) {
 		if (o instanceof FileMessage)
 			return ((FileMessage) o).id == id;
 		return false;
 	}
 
+	@Override
 	public int hashCode() {
 		return id;
 	}
