@@ -1,5 +1,7 @@
 package ssh.command;
 
+import global.PiCloudConstants;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -48,10 +50,16 @@ public class DownloadCommand extends PiCommand {
 									&& fd.getOwner() == uid);
 			if (ownsFile) {
 				File target = new File("storage/" + fileid);
-				FileInputStream fis= new FileInputStream(target);
+				FileInputStream fis = new FileInputStream(target);
 				byte[] raw = new byte[(int) target.length()];
 				fis.read(raw);
 				fis.close();
+				File decrypted = PiCloudConstants.CRYPTO_IMPL.decrypt(raw);
+				fis = new FileInputStream(decrypted);
+				raw = new byte[(int) target.length()];
+				fis.read(raw);
+				fis.close();
+				decrypted.delete();
 				packet = DataPacket.create(raw);
 				result += "true";
 			} else {

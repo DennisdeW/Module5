@@ -3,6 +3,7 @@ package net;
 import files.FileDescriptor;
 import files.NullCrypto;
 import global.Logger;
+import global.PiCloudConstants;
 
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -31,6 +32,8 @@ public class PiSession extends Thread {
 
 	private static volatile int index;
 	private static final Map<String, Boolean> LOGGED_IN;
+	private static final ThreadLocal<String> USERNAME = ThreadLocal
+			.withInitial(() -> "<<not logged in>>");
 
 	static {
 		LOGGED_IN = new HashMap<>();
@@ -110,21 +113,22 @@ public class PiSession extends Thread {
 						if (DownloadCommand.packet != null) {
 							sendPacket(DownloadCommand.packet);
 							DownloadCommand.packet = null;
-						}	
+						}
 						break;
 					case FILE:
 						// TODO
 						Logger.log("Receiving file...");
-						File encrypted = new NullCrypto().encrypt(packet
-								.getData());
+						File encrypted = PiCloudConstants.CRYPTO_IMPL
+								.encrypt(packet.getData());
 						try {
-							FileStatementMaker.addDescriptor(new FileDescriptor(
-									encrypted.getName(),
-									UserStatementMaker
-											.getId(CheckUploadCommand.lastUser),
-									packet.getData().length));
+							FileStatementMaker
+									.addDescriptor(new FileDescriptor(
+											encrypted.getName(),
+											UserStatementMaker
+													.getId(CheckUploadCommand.lastUser),
+											packet.getData().length));
 						} catch (SQLException | UnknownUserException e) {
-							Logger.logError(e);	
+							Logger.logError(e);
 						}
 						Logger.log("File Saved! -- " + encrypted.getName());
 						sendPacket(AnswerPacket.getPacket(encrypted.getName()));
@@ -156,11 +160,13 @@ public class PiSession extends Thread {
 	public static synchronized void logIn(String user) {
 		Logger.log(user + " logged in.");
 		LOGGED_IN.put(user, true);
+		USERNAME.set(user);
 	}
 
 	public static synchronized void logOut(String user) {
 		Logger.log(user + " logged out.");
 		LOGGED_IN.put(user, false);
+		USERNAME.remove();
 	}
 
 	public static synchronized boolean isLoggedIn(String user) {
@@ -178,5 +184,9 @@ public class PiSession extends Thread {
 		Logger.log("Sending packet: " + answer);
 		OutputStream out = socket.getOutputStream();
 		out.write(answer.toArray());
+	}
+
+	public static String getUser() {
+		return USERNAME.get();
 	}
 }

@@ -27,7 +27,16 @@ public class NullCrypto implements Crypto {
 
 	@Override
 	public File decrypt(byte[] cipher) {
-		return null;
+		File f = new File("temp/" + new SecureRandom().nextLong());
+		FileOutputStream fos;
+		try {
+			fos = new FileOutputStream(f);
+			fos.write(cipher);
+			fos.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return f;
 	}
 
 }

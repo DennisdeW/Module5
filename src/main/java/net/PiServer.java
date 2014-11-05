@@ -2,6 +2,7 @@ package net;
 
 import global.Logger;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.SocketException;
 import java.net.SocketTimeoutException;
@@ -23,6 +24,12 @@ public class PiServer extends Thread {
 	static {
 		System.setProperty("javax.net.ssl.keyStore", "keystore");
 		System.setProperty("javax.net.ssl.keyStorePassword", "picloudkeypass");
+		Logger.init();
+		File storage = new File("storage"), temp = new File("temp");
+		if (!storage.isDirectory())
+			storage.mkdir();
+		if (!temp.isDirectory())
+			temp.mkdir();
 		SSLServerSocket t = null;
 		Logger.log("Starting server on port 20022");
 		try {
@@ -86,9 +93,6 @@ public class PiServer extends Thread {
 	}
 
 	public static void main(String[] args) throws IOException {
-		// Security.addProvider(new BouncyCastleProvider());
-		// Certificate kp = getCertificate();
-		Logger.init();
 		instance = new PiServer();
 		instance.start();
 	}

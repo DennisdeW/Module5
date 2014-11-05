@@ -89,12 +89,13 @@ public abstract class PiCommand implements Command {
 				"create", CreateUserCommand.class), STOP("stop",
 				StopCommand.class), DECRYPT("decrypt", DecryptCommand.class), DUMMY(
 				"", DummyCommand.class), CHECK_USER("checkUser",
-				CheckUserCommand.class), DELETE_USER("delete",
+				CheckUserCommand.class), DELETE_USER("deleteUser",
 				DeleteUserCommand.class), LOGIN("login", LoginCommand.class), LOGOUT(
 				"logout", LogoutCommand.class), CHECK_UPLOAD("upload",
 				CheckUploadCommand.class), DOWNLOAD("download",
 				DownloadCommand.class), CHECK_FILE("checkFile",
-				CheckFileCommand.class);
+				CheckFileCommand.class), DELETE_FILE("deleteFile",
+				DeleteFileCommand.class);
 
 		private String command;
 		private Class<? extends PiCommand> clazz;
@@ -197,6 +198,9 @@ public abstract class PiCommand implements Command {
 			if (command.startsWith("create"))
 				Logger.log("Received Create User Command: "
 						+ command.split("-")[1]);
+			else if (command.startsWith("login"))
+				Logger.log("Received Login Command for "
+						+ command.split("-")[1]);
 			else
 				Logger.log("Received Command: " + command + " (sender="
 				/* + SSHManager.username */+ ")");
@@ -216,7 +220,7 @@ public abstract class PiCommand implements Command {
 			String cur = Thread.currentThread().getName();
 			if (cur.contains("sshd")) {
 				char lastchar = cur.charAt(cur.length() - 1);
-				Thread.currentThread().setName("SSH Command " + lastchar);
+				Thread.currentThread().setName("Command " + lastchar);
 			}
 		}
 	}
